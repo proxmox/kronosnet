@@ -1,0 +1,148 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Fabian=20Gr=C3=BCnbichler?= <f.gruenbichler@proxmox.com>
+Date: Wed, 22 May 2019 14:11:59 +0200
+Subject: [PATCH kronosnet] cherry-pick crypto patches
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+for compatibility with Corosync 2.x key files
+
+Signed-off-by: Fabian Grünbichler <f.gruenbichler@proxmox.com>
+---
+ .../crypto-remove-libnss-3des-support.patch   | 74 +++++++++++++++++++
+ ...e-minimum-crypto-key-size-to-1024bit.patch | 35 +++++++++
+ debian/patches/series                         |  2 +
+ 3 files changed, 111 insertions(+)
+ create mode 100644 debian/patches/crypto-remove-libnss-3des-support.patch
+ create mode 100644 debian/patches/reduce-minimum-crypto-key-size-to-1024bit.patch
+
+diff --git a/debian/patches/crypto-remove-libnss-3des-support.patch b/debian/patches/crypto-remove-libnss-3des-support.patch
+new file mode 100644
+index 0000000..c8d1123
+--- /dev/null
++++ b/debian/patches/crypto-remove-libnss-3des-support.patch
+@@ -0,0 +1,74 @@
++From: "Fabio M. Di Nitto" <fdinitto@redhat.com>
++Date: Thu, 11 Apr 2019 13:36:56 +0200
++Subject: [crypto] remove libnss 3des support
++
++Signed-off-by: Fabio M. Di Nitto <fdinitto@redhat.com>
++(cherry picked from commit acb5adb7f3ea6eaaf858d86e064a9b3fe477ea11)
++---
++ libknet/libknet.h    |  2 +-
++ libknet/crypto_nss.c | 14 ++++----------
++ 2 files changed, 5 insertions(+), 11 deletions(-)
++
++diff --git a/libknet/libknet.h b/libknet/libknet.h
++index 0331b1f..d0c90e4 100644
++--- a/libknet/libknet.h
+++++ b/libknet/libknet.h
++@@ -617,7 +617,7 @@ struct knet_handle_crypto_cfg {
++  *                         It can be set to "none" to disable
++  *                         encryption.
++  *                         Currently supported by "nss" model:
++- *                         "3des", "aes128", "aes192" and "aes256".
+++ *                         "aes128", "aes192" and "aes256".
++  *                         "openssl" model supports more modes and it strictly
++  *                         depends on the openssl build. See: EVP_get_cipherbyname
++  *                         openssl API call for details.
++diff --git a/libknet/crypto_nss.c b/libknet/crypto_nss.c
++index 35afa0f..a17ff62 100644
++--- a/libknet/crypto_nss.c
+++++ b/libknet/crypto_nss.c
++@@ -64,32 +64,28 @@ enum nsscrypto_crypt_t {
++ 	CRYPTO_CIPHER_TYPE_NONE = 0,
++ 	CRYPTO_CIPHER_TYPE_AES256 = 1,
++ 	CRYPTO_CIPHER_TYPE_AES192 = 2,
++-	CRYPTO_CIPHER_TYPE_AES128 = 3,
++-	CRYPTO_CIPHER_TYPE_3DES = 4
+++	CRYPTO_CIPHER_TYPE_AES128 = 3
++ };
++ 
++ CK_MECHANISM_TYPE cipher_to_nss[] = {
++ 	0,				/* CRYPTO_CIPHER_TYPE_NONE */
++ 	CKM_AES_CBC_PAD,		/* CRYPTO_CIPHER_TYPE_AES256 */
++ 	CKM_AES_CBC_PAD,		/* CRYPTO_CIPHER_TYPE_AES192 */
++-	CKM_AES_CBC_PAD,		/* CRYPTO_CIPHER_TYPE_AES128 */
++-	CKM_DES3_CBC_PAD 		/* CRYPTO_CIPHER_TYPE_3DES */
+++	CKM_AES_CBC_PAD			/* CRYPTO_CIPHER_TYPE_AES128 */
++ };
++ 
++ size_t nsscipher_key_len[] = {
++ 	0,				/* CRYPTO_CIPHER_TYPE_NONE */
++ 	AES_256_KEY_LENGTH,		/* CRYPTO_CIPHER_TYPE_AES256 */
++ 	AES_192_KEY_LENGTH,		/* CRYPTO_CIPHER_TYPE_AES192 */
++-	AES_128_KEY_LENGTH,		/* CRYPTO_CIPHER_TYPE_AES128 */
++-	24				/* CRYPTO_CIPHER_TYPE_3DES */
+++	AES_128_KEY_LENGTH		/* CRYPTO_CIPHER_TYPE_AES128 */
++ };
++ 
++ size_t nsscypher_block_len[] = {
++ 	0,				/* CRYPTO_CIPHER_TYPE_NONE */
++ 	AES_BLOCK_SIZE,			/* CRYPTO_CIPHER_TYPE_AES256 */
++ 	AES_BLOCK_SIZE,			/* CRYPTO_CIPHER_TYPE_AES192 */
++-	AES_BLOCK_SIZE,			/* CRYPTO_CIPHER_TYPE_AES128 */
++-	0				/* CRYPTO_CIPHER_TYPE_3DES */
+++	AES_BLOCK_SIZE			/* CRYPTO_CIPHER_TYPE_AES128 */
++ };
++ 
++ /*
++@@ -155,8 +151,6 @@ static int nssstring_to_crypto_cipher_type(const char* crypto_cipher_type)
++ 		return CRYPTO_CIPHER_TYPE_AES192;
++ 	} else if (strcmp(crypto_cipher_type, "aes128") == 0) {
++ 		return CRYPTO_CIPHER_TYPE_AES128;
++-	} else if (strcmp(crypto_cipher_type, "3des") == 0) {
++-		return CRYPTO_CIPHER_TYPE_3DES;
++ 	}
++ 	return -1;
++ }
+diff --git a/debian/patches/reduce-minimum-crypto-key-size-to-1024bit.patch b/debian/patches/reduce-minimum-crypto-key-size-to-1024bit.patch
+new file mode 100644
+index 0000000..065a53b
+--- /dev/null
++++ b/debian/patches/reduce-minimum-crypto-key-size-to-1024bit.patch
+@@ -0,0 +1,35 @@
++From: =?utf-8?q?Fabian_Gr=C3=BCnbichler?= <f.gruenbichler@proxmox.com>
++Date: Wed, 3 Apr 2019 14:28:50 +0200
++Subject: reduce minimum crypto key size to 1024bit
++MIME-Version: 1.0
++Content-Type: text/plain; charset="utf-8"
++Content-Transfer-Encoding: 8bit
++
++Since the key is used for AES/3DES and HMAC operations only, this is
++safe. AES/3DES use keys in the 128- to 256-bit range, HMAC with
++MD5/SHA1/SHA2 should use keys with a minimum of 128- to 512-bit (in both
++cases, depending on the actual algorithm used).
++
++This reduction also keeps knet compatible with existing Corosync 2.x
++keyfiles, which are 1024-bit.
++
++Signed-off-by: Fabian Grünbichler <f.gruenbichler@proxmox.com>
++(cherry picked from commit 4e648f76930af8c376a833677d940b2b0efc3c86)
++---
++ libknet/libknet.h | 3 +--
++ 1 file changed, 1 insertion(+), 2 deletions(-)
++
++diff --git a/libknet/libknet.h b/libknet/libknet.h
++index 36fefa5..0331b1f 100644
++--- a/libknet/libknet.h
+++++ b/libknet/libknet.h
++@@ -587,8 +587,7 @@ int knet_handle_pmtud_get(knet_handle_t knet_h,
++ 				unsigned int *data_mtu);
++ 
++ 
++-
++-#define KNET_MIN_KEY_LEN  256
+++#define KNET_MIN_KEY_LEN  128
++ #define KNET_MAX_KEY_LEN 4096
++ 
++ struct knet_handle_crypto_cfg {
+diff --git a/debian/patches/series b/debian/patches/series
+index 7fbd139..25f1ff5 100644
+--- a/debian/patches/series
++++ b/debian/patches/series
+@@ -1 +1,3 @@
+ send-test-skip-the-SCTP-test-if-SCTP-is-not-supported-by-.patch
++reduce-minimum-crypto-key-size-to-1024bit.patch
++crypto-remove-libnss-3des-support.patch
