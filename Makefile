@@ -1,6 +1,6 @@
 VERSION=1.8
 DEBRELEASE=2
-PVERELEASE=1
+PVERELEASE=pve1
 
 BUILDDIR=kronosnet-${VERSION}
 SRCARCHIVE=kronosnet_${VERSION}.orig.tar.xz
@@ -14,7 +14,7 @@ OTHER_DEBS=								\
 	libknet-doc_${VERSION}-${PVERELEASE}_all.deb			\
 	libknet1-dbgsym_${VERSION}-${PVERELEASE}_${ARCH}.deb		\
 	libnozzle1-dbgsym_${VERSION}-${PVERELEASE}_${ARCH}.deb		\
-	libnozzle1-dev_${VERSION}-${PVERELEASE}_${ARCH}.deb		\
+	libnozzle-dev_${VERSION}-${PVERELEASE}_${ARCH}.deb		\
 
 DEBS=${MAIN_DEB} ${OTHER_DEBS}
 DSC=kronosnet-${VERSION}-${PVERELEASE}.dsc
