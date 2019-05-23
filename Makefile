@@ -35,6 +35,7 @@ deb: ${DEBS}
 ${OTHER_DEBS}: ${MAIN_DEB}
 ${MAIN_DEB}: ${BUILDDIR}
 	cd ${BUILDDIR}; dpkg-buildpackage -b -us -uc
+	lintian ${MAIN_DEB} ${OTHER_DEBS}
 
 dsc: ${DSC}
 ${DSC}: ${BUILDDIR}
