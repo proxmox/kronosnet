@@ -1,5 +1,5 @@
-VERSION=1.8
-DEBRELEASE=2
+VERSION=1.10
+DEBRELEASE=0+really1.8-2
 PVERELEASE=pve1~bpo9
 
 BUILDDIR=kronosnet-${VERSION}
@@ -24,8 +24,9 @@ all: ${DEBS}
 
 ${BUILDDIR}: upstream/${SRCARCHIVE} upstream/${DEBARCHIVE} patches/*
 	rm -rf ${BUILDDIR}
+	mkdir ${BUILDDIR}
 	ln -sf upstream/${SRCARCHIVE} ${SRCARCHIVE}
-	tar -xf upstream/${SRCARCHIVE}
+	tar -x -C ${BUILDDIR} --strip-components=1 -f upstream/${SRCARCHIVE}
 	tar -C ${BUILDDIR} -xf upstream/${DEBARCHIVE}
 	cd ${BUILDDIR}; ln -s ../patches patches
 	cd ${BUILDDIR}; quilt push -a
