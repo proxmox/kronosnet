@@ -1,0 +1,25 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Fabian=20Gr=C3=BCnbichler?= <f.gruenbichler@proxmox.com>
+Date: Wed, 19 Jun 2019 10:21:59 +0200
+Subject: [PATCH kronosnet] add libzstd-dev to build-depends
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+Signed-off-by: Fabian Grünbichler <f.gruenbichler@proxmox.com>
+---
+ debian/control | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/debian/control b/debian/control
+index 807977c..de690e2 100644
+--- a/debian/control
++++ b/debian/control
+@@ -17,6 +17,7 @@ Build-Depends:
+  liblzma-dev,
+  liblzo2-dev,
+  zlib1g-dev,
++ libzstd-dev,
+ # Crypto plugins:
+  libnss3-dev,
+  libnspr4-dev,

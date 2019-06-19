@@ -1,0 +1,776 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Fabian=20Gr=C3=BCnbichler?= <f.gruenbichler@proxmox.com>
+Date: Wed, 19 Jun 2019 09:17:04 +0200
+Subject: [PATCH kronosnet] cherry-pick 1.9 as patches
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+Signed-off-by: Fabian Grünbichler <f.gruenbichler@proxmox.com>
+---
+ ...ther-exception-to-valgrind-nss-combo.patch |  35 +++
+ .../crypto-remove-libnss-3des-support.patch   |  74 +++++
+ debian/patches/man-Tidy-manpages-215.patch    | 297 ++++++++++++++++++
+ debian/patches/man-Tidy-more-man-pages.patch  |  47 +++
+ ...net_host_set_policy-parameters-order.patch |  27 ++
+ ...-errors-detected-by-newly-added-test.patch |  41 +++
+ ...e-minimum-crypto-key-size-to-1024bit.patch |  35 +++
+ ...eck-to-verify-doxy-header-order-and-.patch |  37 +++
+ ...or-message-decoding-from-ICMP-errors.patch |  38 +++
+ ...udp-use-defines-vs-hardcoded-numbers.patch |  36 +++
+ debian/patches/series                         |  10 +
+ 11 files changed, 677 insertions(+)
+ create mode 100644 debian/patches/build-add-another-exception-to-valgrind-nss-combo.patch
+ create mode 100644 debian/patches/crypto-remove-libnss-3des-support.patch
+ create mode 100644 debian/patches/man-Tidy-manpages-215.patch
+ create mode 100644 debian/patches/man-Tidy-more-man-pages.patch
+ create mode 100644 debian/patches/man-fix-knet_host_set_policy-parameters-order.patch
+ create mode 100644 debian/patches/man-fix-libknet.h-for-errors-detected-by-newly-added-test.patch
+ create mode 100644 debian/patches/reduce-minimum-crypto-key-size-to-1024bit.patch
+ create mode 100644 debian/patches/tests-add-man-page-check-to-verify-doxy-header-order-and-.patch
+ create mode 100644 debian/patches/udp-improve-error-message-decoding-from-ICMP-errors.patch
+ create mode 100644 debian/patches/udp-use-defines-vs-hardcoded-numbers.patch
+
+diff --git a/debian/patches/build-add-another-exception-to-valgrind-nss-combo.patch b/debian/patches/build-add-another-exception-to-valgrind-nss-combo.patch
+new file mode 100644
+index 0000000..4b60b6b
+--- /dev/null
++++ b/debian/patches/build-add-another-exception-to-valgrind-nss-combo.patch
+@@ -0,0 +1,35 @@
++From: "Fabio M. Di Nitto" <fdinitto@redhat.com>
++Date: Tue, 29 Jan 2019 05:33:51 +0100
++Subject: [build] add another exception to valgrind nss combo
++
++Signed-off-by: Fabio M. Di Nitto <fdinitto@redhat.com>
++(cherry picked from commit a6746007986b9324760822aa0190d035b8da7352)
++---
++ build-aux/knet_valgrind_memcheck.supp | 17 +++++++++++++++++
++ 1 file changed, 17 insertions(+)
++
++diff --git a/build-aux/knet_valgrind_memcheck.supp b/build-aux/knet_valgrind_memcheck.supp
++index 8b3f95f..e0f49d0 100644
++--- a/build-aux/knet_valgrind_memcheck.supp
+++++ b/build-aux/knet_valgrind_memcheck.supp
++@@ -588,3 +588,20 @@
++    obj:/usr/lib64/libnss3.so
++    obj:/usr/lib64/libnss3.so
++ }
+++{
+++   nss internal leak (3.41) non recurring (spotted on f29)
+++   Memcheck:Leak
+++   match-leak-kinds: definite
+++   fun:malloc
+++   obj:*
+++   obj:*
+++   obj:*
+++   obj:*
+++   obj:*
+++   obj:*
+++   obj:*
+++   obj:*
+++   obj:*
+++   obj:*
+++   obj:/usr/lib64/libnss3.so
+++}
+diff --git a/debian/patches/crypto-remove-libnss-3des-support.patch b/debian/patches/crypto-remove-libnss-3des-support.patch
+new file mode 100644
+index 0000000..c8d1123
+--- /dev/null
++++ b/debian/patches/crypto-remove-libnss-3des-support.patch
+@@ -0,0 +1,74 @@
++From: "Fabio M. Di Nitto" <fdinitto@redhat.com>
++Date: Thu, 11 Apr 2019 13:36:56 +0200
++Subject: [crypto] remove libnss 3des support
++
++Signed-off-by: Fabio M. Di Nitto <fdinitto@redhat.com>
++(cherry picked from commit acb5adb7f3ea6eaaf858d86e064a9b3fe477ea11)
++---
++ libknet/libknet.h    |  2 +-
++ libknet/crypto_nss.c | 14 ++++----------
++ 2 files changed, 5 insertions(+), 11 deletions(-)
++
++diff --git a/libknet/libknet.h b/libknet/libknet.h
++index 0331b1f..d0c90e4 100644
++--- a/libknet/libknet.h
+++++ b/libknet/libknet.h
++@@ -617,7 +617,7 @@ struct knet_handle_crypto_cfg {
++  *                         It can be set to "none" to disable
++  *                         encryption.
++  *                         Currently supported by "nss" model:
++- *                         "3des", "aes128", "aes192" and "aes256".
+++ *                         "aes128", "aes192" and "aes256".
++  *                         "openssl" model supports more modes and it strictly
++  *                         depends on the openssl build. See: EVP_get_cipherbyname
++  *                         openssl API call for details.
++diff --git a/libknet/crypto_nss.c b/libknet/crypto_nss.c
++index 35afa0f..a17ff62 100644
++--- a/libknet/crypto_nss.c
+++++ b/libknet/crypto_nss.c
++@@ -64,32 +64,28 @@ enum nsscrypto_crypt_t {
++ 	CRYPTO_CIPHER_TYPE_NONE = 0,
++ 	CRYPTO_CIPHER_TYPE_AES256 = 1,
++ 	CRYPTO_CIPHER_TYPE_AES192 = 2,
++-	CRYPTO_CIPHER_TYPE_AES128 = 3,
++-	CRYPTO_CIPHER_TYPE_3DES = 4
+++	CRYPTO_CIPHER_TYPE_AES128 = 3
++ };
++ 
++ CK_MECHANISM_TYPE cipher_to_nss[] = {
++ 	0,				/* CRYPTO_CIPHER_TYPE_NONE */
++ 	CKM_AES_CBC_PAD,		/* CRYPTO_CIPHER_TYPE_AES256 */
++ 	CKM_AES_CBC_PAD,		/* CRYPTO_CIPHER_TYPE_AES192 */
++-	CKM_AES_CBC_PAD,		/* CRYPTO_CIPHER_TYPE_AES128 */
++-	CKM_DES3_CBC_PAD 		/* CRYPTO_CIPHER_TYPE_3DES */
+++	CKM_AES_CBC_PAD			/* CRYPTO_CIPHER_TYPE_AES128 */
++ };
++ 
++ size_t nsscipher_key_len[] = {
++ 	0,				/* CRYPTO_CIPHER_TYPE_NONE */
++ 	AES_256_KEY_LENGTH,		/* CRYPTO_CIPHER_TYPE_AES256 */
++ 	AES_192_KEY_LENGTH,		/* CRYPTO_CIPHER_TYPE_AES192 */
++-	AES_128_KEY_LENGTH,		/* CRYPTO_CIPHER_TYPE_AES128 */
++-	24				/* CRYPTO_CIPHER_TYPE_3DES */
+++	AES_128_KEY_LENGTH		/* CRYPTO_CIPHER_TYPE_AES128 */
++ };
++ 
++ size_t nsscypher_block_len[] = {
++ 	0,				/* CRYPTO_CIPHER_TYPE_NONE */
++ 	AES_BLOCK_SIZE,			/* CRYPTO_CIPHER_TYPE_AES256 */
++ 	AES_BLOCK_SIZE,			/* CRYPTO_CIPHER_TYPE_AES192 */
++-	AES_BLOCK_SIZE,			/* CRYPTO_CIPHER_TYPE_AES128 */
++-	0				/* CRYPTO_CIPHER_TYPE_3DES */
+++	AES_BLOCK_SIZE			/* CRYPTO_CIPHER_TYPE_AES128 */
++ };
++ 
++ /*
++@@ -155,8 +151,6 @@ static int nssstring_to_crypto_cipher_type(const char* crypto_cipher_type)
++ 		return CRYPTO_CIPHER_TYPE_AES192;
++ 	} else if (strcmp(crypto_cipher_type, "aes128") == 0) {
++ 		return CRYPTO_CIPHER_TYPE_AES128;
++-	} else if (strcmp(crypto_cipher_type, "3des") == 0) {
++-		return CRYPTO_CIPHER_TYPE_3DES;
++ 	}
++ 	return -1;
++ }
+diff --git a/debian/patches/man-Tidy-manpages-215.patch b/debian/patches/man-Tidy-manpages-215.patch
+new file mode 100644
+index 0000000..f0b5b37
+--- /dev/null
++++ b/debian/patches/man-Tidy-manpages-215.patch
+@@ -0,0 +1,297 @@
++From: Chrissie Caulfield <ccaulfie@redhat.com>
++Date: Tue, 16 Apr 2019 14:46:01 +0100
++Subject: man: Tidy manpages (#215)
++
++* man: Tidy manpages for libnozzle
++
++doxygen works in mysterious ways, adding a blank line before
++@brief makes the lines following that much tidier.
++
++So now instead of
++
++nozzle_close nozzle - pointer to the nozzle struct to destroy
++
++we get:
++
++nozzle_close
++
++       nozzle - pointer to the nozzle struct to destroy
++
++* doxyxml: Cope with pointers-to-pointers passed as params
++
++Double pointers showed as ' * *name' when they should be '  **name'.
++
++Also tidy STRUCTURES display so that they are not indented too much,
++
++* man: Similar @brief fixes for libknet.h
++
++* doxyxml: Tidy descriptions of functions as parameters
++
++If a complex function pointer was passed as a parameter then doxyxml
++tryied to line up all the other parameters with it - making a mess
++by having lots of blank space between the type and the name.
++
++Now we enforce a maximum type length (a line-ish) so that shorter
++tyopes will line up OK and the really long ones will be left to their
++own devices.
++
++(cherry picked from commit 652e355252adf6d248123d564c607c338e899f98)
++---
++ libknet/libknet.h     |  3 +++
++ libnozzle/libnozzle.h | 24 +++++++++++++++++++++---
++ man/doxyxml.c         | 30 ++++++++++++++++++++----------
++ 3 files changed, 44 insertions(+), 13 deletions(-)
++
++diff --git a/libknet/libknet.h b/libknet/libknet.h
++index d0c90e4..181724a 100644
++--- a/libknet/libknet.h
+++++ b/libknet/libknet.h
++@@ -275,6 +275,7 @@ int knet_handle_add_datafd(knet_handle_t knet_h, int *datafd, int8_t *channel);
++ 
++ /**
++  * knet_handle_remove_datafd
+++ *
++  * @brief Remove a file descriptor from knet
++  *
++  * knet_h   - pointer to knet_handle_t
++@@ -293,6 +294,7 @@ int knet_handle_remove_datafd(knet_handle_t knet_h, int datafd);
++ 
++ /**
++  * knet_handle_get_channel
+++ *
++  * @brief Get the channel associated with a file descriptor
++  *
++  * knet_h  - pointer to knet_handle_t
++@@ -313,6 +315,7 @@ int knet_handle_get_channel(knet_handle_t knet_h, const int datafd, int8_t *chan
++ 
++ /**
++  * knet_handle_get_datafd
+++ *
++  * @brief Get the file descriptor associated with a channel
++  *
++  * knet_h   - pointer to knet_handle_t
++diff --git a/libnozzle/libnozzle.h b/libnozzle/libnozzle.h
++index 82ca74d..b8ab7d6 100644
++--- a/libnozzle/libnozzle.h
+++++ b/libnozzle/libnozzle.h
++@@ -25,6 +25,7 @@ typedef struct nozzle_iface *nozzle_t;
++ 
++ /**
++  * nozzle_open
+++ *
++  * @brief create a new tap device on the system.
++  *
++  * devname - pointer to device name of at least size IFNAMSIZ.
++@@ -55,6 +56,7 @@ nozzle_t nozzle_open(char *devname, size_t devname_size, const char *updownpath)
++ 
++ /**
++  * nozzle_close
+++ *
++  * @brief deconfigure and destroy a nozzle device
++  *
++  * nozzle - pointer to the nozzle struct to destroy
++@@ -74,9 +76,8 @@ int nozzle_close(nozzle_t nozzle);
++ 
++ /**
++  * nozzle_run_updown
++- * @brief execute updown commands associated with a nozzle device. It is
++- *        the application responsibility to call helper scripts
++- *        before or after creating/destroying interfaces or IP addresses.
+++ *
+++ * @brief execute updown commands associated with a nozzle device.
++  *
++  * nozzle - pointer to the nozzle struct
++  *
++@@ -86,6 +87,9 @@ int nozzle_close(nozzle_t nozzle);
++  *               The string is malloc'ed, the caller needs to free the buffer.
++  *               If the script generates no output this string might be NULL.
++  *
+++ * It is the application responsibility to call helper scripts
+++ * before or after creating/destroying interfaces or IP addresses.
+++ *
++  * @return
++  * 0 on success
++  * -1 on error and errno is set (sanity checks and internal calls.
++@@ -96,6 +100,7 @@ int nozzle_run_updown(const nozzle_t nozzle, uint8_t action, char **exec_string)
++ 
++ /**
++  * nozzle_set_up
+++ *
++  * @brief equivalent of ifconfig up
++  *
++  * nozzle - pointer to the nozzle struct
++@@ -109,6 +114,7 @@ int nozzle_set_up(nozzle_t nozzle);
++ 
++ /**
++  * nozzle_set_down
+++ *
++  * @brief equivalent of ifconfig down
++  *
++  * nozzle - pointer to the nozzle struct
++@@ -122,6 +128,7 @@ int nozzle_set_down(nozzle_t nozzle);
++ 
++ /**
++  * nozzle_add_ip
+++ *
++  * @brief equivalent of ip addr or ifconfig <ipaddress/prefix>
++  *
++  * nozzle - pointer to the nozzle struct
++@@ -142,6 +149,7 @@ int nozzle_add_ip(nozzle_t nozzle, const char *ipaddr, const char *prefix);
++ 
++ /**
++  * nozzle_del_ip
+++ *
++  * @brief equivalent of ip addr del or ifconfig del <ipaddress/prefix>
++  *
++  * nozzle - pointer to the nozzle struct
++@@ -170,6 +178,7 @@ struct nozzle_ip {
++ 
++ /**
++  * nozzle_get_ips
+++ *
++  * @brief retrieve the list of all configured ips for a given interface
++  *
++  * nozzle - pointer to the nozzle struct
++@@ -191,6 +200,7 @@ int nozzle_get_ips(const nozzle_t nozzle, struct nozzle_ip **nozzle_ip);
++ 
++ /**
++  * nozzle_get_mtu
+++ *
++  * @brief retrieve mtu on a given nozzle interface
++  *
++  * nozzle - pointer to the nozzle struct
++@@ -204,6 +214,7 @@ int nozzle_get_mtu(const nozzle_t nozzle);
++ 
++ /**
++  * nozzle_set_mtu
+++ *
++  * @brief set mtu on a given nozzle interface
++  *
++  * nozzle - pointer to the nozzle struct
++@@ -219,6 +230,7 @@ int nozzle_set_mtu(nozzle_t nozzle, const int mtu);
++ 
++ /**
++  * nozzle_reset_mtu
+++ *
++  * @brief reset mtu on a given nozzle interface to the system default
++  *
++  * nozzle - pointer to the nozzle struct
++@@ -232,6 +244,7 @@ int nozzle_reset_mtu(nozzle_t nozzle);
++ 
++ /**
++  * nozzle_get_mac
+++ *
++  * @brief retrieve mac address on a given nozzle interface
++  *
++  * nozzle - pointer to the nozzle struct
++@@ -247,6 +260,7 @@ int nozzle_get_mac(const nozzle_t nozzle, char **ether_addr);
++ 
++ /**
++  * nozzle_set_mac
+++ *
++  * @brief set mac address on a given nozzle interface
++  *
++  * nozzle - pointer to the nozzle struct
++@@ -262,6 +276,7 @@ int nozzle_set_mac(nozzle_t nozzle, const char *ether_addr);
++ 
++ /**
++  * nozzle_reset_mac
+++ *
++  * @brief reset mac address on a given nozzle interface to system default
++  *
++  * nozzle - pointer to the nozzle struct
++@@ -275,6 +290,7 @@ int nozzle_reset_mac(nozzle_t nozzle);
++ 
++ /**
++  * nozzle_get_handle_by_name
+++ *
++  * @brief find a nozzle handle by device name
++  *
++  * devname - string containing the name of the interface
++@@ -288,6 +304,7 @@ nozzle_t nozzle_get_handle_by_name(const char *devname);
++ 
++ /**
++  * nozzle_get_name_by_handle
+++ *
++  * @brief retrieve nozzle interface name by handle
++  *
++  * nozzle - pointer to the nozzle struct
++@@ -301,6 +318,7 @@ const char *nozzle_get_name_by_handle(const nozzle_t nozzle);
++ 
++ /**
++  * nozzle_get_fd
+++ *
++  * @brief
++  *
++  * nozzle - pointer to the nozzle struct
++diff --git a/man/doxyxml.c b/man/doxyxml.c
++index b4b49a9..b623711 100644
++--- a/man/doxyxml.c
+++++ b/man/doxyxml.c
++@@ -34,6 +34,14 @@
++ #define XML_DIR "../man/xml-knet"
++ #define XML_FILE "libknet_8h.xml"
++ 
+++/*
+++ * This isn't a maximum size, it just defines how long a parameter
+++ * type can get before we decide it's not worth lining everything up to.
+++ * it's mainly to stop function pointer types (which can get VERY long because
+++ * of all *their* parameters) making everything else 'line-up' over separate lines
+++ */
+++#define LINE_LENGTH 80
+++
++ static int print_ascii = 1;
++ static int print_man = 0;
++ static int print_params = 0;
++@@ -332,19 +340,25 @@ static int read_structure_from_xml(char *refid, char *name)
++ 
++ static void print_param(FILE *manfile, struct param_info *pi, int field_width, int bold, const char *delimiter)
++ {
++-	char asterisk = ' ';
+++	char *asterisks = "  ";
++ 	char *type = pi->paramtype;
++ 
++ 	/* Reformat pointer params so they look nicer */
++ 	if (pi->paramtype[strlen(pi->paramtype)-1] == '*') {
++-		asterisk='*';
+++		asterisks=" *";
++ 		type = strdup(pi->paramtype);
++ 		type[strlen(type)-1] = '\0';
+++
+++		/* Cope with double pointers */
+++		if (pi->paramtype[strlen(type)-1] == '*') {
+++			asterisks="**";
+++			type[strlen(type)-1] = '\0';
+++		}
++ 	}
++ 
++-	fprintf(manfile, "    %s%-*s%c%s\\fI%s\\fP%s\n",
+++	fprintf(manfile, "    %s%-*s%s%s\\fI%s\\fP%s\n",
++ 		bold?"\\fB":"", field_width, type,
++-		asterisk, bold?"\\fP":"", pi->paramname, delimiter);
+++		asterisks, bold?"\\fP":"", pi->paramname, delimiter);
++ 
++ 	if (type != pi->paramtype) {
++ 		free(type);
++@@ -504,7 +518,8 @@ static void print_manpage(char *name, char *def, char *brief, char *args, char *
++ 	qb_list_for_each(iter, &params_list) {
++ 		pi = qb_list_entry(iter, struct param_info, list);
++ 
++-		if (strlen(pi->paramtype) > max_param_type_len) {
+++		if ((strlen(pi->paramtype) < LINE_LENGTH) &&
+++		    (strlen(pi->paramtype) > max_param_type_len)) {
++ 			max_param_type_len = strlen(pi->paramtype);
++ 		}
++ 		if (strlen(pi->paramname) > max_param_name_len) {
++@@ -559,11 +574,6 @@ static void print_manpage(char *name, char *def, char *brief, char *args, char *
++ 
++ 		map_iter = qb_map_iter_create(used_structures_map);
++ 		for (p = qb_map_iter_next(map_iter, &data); p; p = qb_map_iter_next(map_iter, &data)) {
++-			fprintf(manfile, ".SS \"\"\n");
++-			fprintf(manfile, ".PP\n");
++-			fprintf(manfile, ".sp\n");
++-			fprintf(manfile, ".sp\n");
++-			fprintf(manfile, ".RS\n");
++ 			fprintf(manfile, ".nf\n");
++ 			fprintf(manfile, "\\fB\n");
++ 
+diff --git a/debian/patches/man-Tidy-more-man-pages.patch b/debian/patches/man-Tidy-more-man-pages.patch
+new file mode 100644
+index 0000000..21c6e04
+--- /dev/null
++++ b/debian/patches/man-Tidy-more-man-pages.patch
+@@ -0,0 +1,47 @@
++From: Christine Caulfield <ccaulfie@redhat.com>
++Date: Mon, 29 Apr 2019 15:16:27 +0100
++Subject: man: Tidy more man pages
++
++Followup to previous 'tidy'
++
++(cherry picked from commit 4ff309b82bbd11300e761ecdcafde596115fc7f7)
++---
++ libknet/libknet.h | 4 ++++
++ 1 file changed, 4 insertions(+)
++
++diff --git a/libknet/libknet.h b/libknet/libknet.h
++index 181724a..7b5a9e3 100644
++--- a/libknet/libknet.h
+++++ b/libknet/libknet.h
++@@ -151,6 +151,7 @@ knet_handle_t knet_handle_new(knet_node_id_t host_id,
++ 
++ /**
++  * knet_handle_free
+++ *
++  * @brief Destroy a knet handle, free all resources
++  *
++  * knet_h   - pointer to knet_handle_t
++@@ -165,6 +166,7 @@ int knet_handle_free(knet_handle_t knet_h);
++ 
++ /**
++  * knet_handle_enable_sock_notify
+++ *
++  * @brief Register a callback to receive socket events
++  *
++  * knet_h   - pointer to knet_handle_t
++@@ -336,6 +338,7 @@ int knet_handle_get_datafd(knet_handle_t knet_h, const int8_t channel, int *data
++ 
++ /**
++  * knet_recv
+++ *
++  * @brief Receive data from knet nodes
++  *
++  * knet_h   - pointer to knet_handle_t
++@@ -358,6 +361,7 @@ ssize_t knet_recv(knet_handle_t knet_h,
++ 
++ /**
++  * knet_send
+++ *
++  * @brief Send data to knet nodes
++  *
++  * knet_h   - pointer to knet_handle_t
+diff --git a/debian/patches/man-fix-knet_host_set_policy-parameters-order.patch b/debian/patches/man-fix-knet_host_set_policy-parameters-order.patch
+new file mode 100644
+index 0000000..5d50b61
+--- /dev/null
++++ b/debian/patches/man-fix-knet_host_set_policy-parameters-order.patch
+@@ -0,0 +1,27 @@
++From: "Fabio M. Di Nitto" <fdinitto@redhat.com>
++Date: Tue, 30 Apr 2019 05:06:47 +0200
++Subject: [man] fix knet_host_set_policy parameters order
++
++Signed-off-by: Fabio M. Di Nitto <fdinitto@redhat.com>
++(cherry picked from commit 73e1b520482cef7ced995423aa3f6f53d16b66c4)
++---
++ libknet/libknet.h | 4 ++--
++ 1 file changed, 2 insertions(+), 2 deletions(-)
++
++diff --git a/libknet/libknet.h b/libknet/libknet.h
++index 7b5a9e3..7c0c440 100644
++--- a/libknet/libknet.h
+++++ b/libknet/libknet.h
++@@ -1027,10 +1027,10 @@ int knet_host_get_host_list(knet_handle_t knet_h,
++ /**
++  * knet_host_set_policy
++  *
++- * knet_h   - pointer to knet_handle_t
++- *
++  * @brief Set the switching policy for a host's links
++  *
+++ * knet_h   - pointer to knet_handle_t
+++ *
++  * host_id  - see knet_host_add(3)
++  *
++  * policy   - there are currently 3 kind of simple switching policies
+diff --git a/debian/patches/man-fix-libknet.h-for-errors-detected-by-newly-added-test.patch b/debian/patches/man-fix-libknet.h-for-errors-detected-by-newly-added-test.patch
+new file mode 100644
+index 0000000..79925df
+--- /dev/null
++++ b/debian/patches/man-fix-libknet.h-for-errors-detected-by-newly-added-test.patch
+@@ -0,0 +1,41 @@
++From: "Fabio M. Di Nitto" <fdinitto@redhat.com>
++Date: Tue, 30 Apr 2019 05:42:48 +0200
++Subject: [man] fix libknet.h for errors detected by newly added test
++
++Signed-off-by: Fabio M. Di Nitto <fdinitto@redhat.com>
++(cherry picked from commit 8e00c883883f0ee183aa3472e5ee72210318ce14)
++---
++ libknet/libknet.h | 6 +++---
++ 1 file changed, 3 insertions(+), 3 deletions(-)
++
++diff --git a/libknet/libknet.h b/libknet/libknet.h
++index 7c0c440..c7f44d7 100644
++--- a/libknet/libknet.h
+++++ b/libknet/libknet.h
++@@ -1144,7 +1144,7 @@ struct knet_host_status {
++ };
++ 
++ /**
++- * knet_host_status_get
+++ * knet_host_get_status
++  *
++  * @brief Get the status of a host
++  *
++@@ -1939,7 +1939,7 @@ struct knet_log_msg {
++ };
++ 
++ /**
++- * knet_log_set_log_level
+++ * knet_log_set_loglevel
++  *
++  * @brief Set the logging level for a subsystem
++  *
++@@ -1962,7 +1962,7 @@ int knet_log_set_loglevel(knet_handle_t knet_h, uint8_t subsystem,
++ 			  uint8_t level);
++ 
++ /**
++- * knet_log_get_log_level
+++ * knet_log_get_loglevel
++  *
++  * @brief Get the logging level for a subsystem
++  *
+diff --git a/debian/patches/reduce-minimum-crypto-key-size-to-1024bit.patch b/debian/patches/reduce-minimum-crypto-key-size-to-1024bit.patch
+new file mode 100644
+index 0000000..065a53b
+--- /dev/null
++++ b/debian/patches/reduce-minimum-crypto-key-size-to-1024bit.patch
+@@ -0,0 +1,35 @@
++From: =?utf-8?q?Fabian_Gr=C3=BCnbichler?= <f.gruenbichler@proxmox.com>
++Date: Wed, 3 Apr 2019 14:28:50 +0200
++Subject: reduce minimum crypto key size to 1024bit
++MIME-Version: 1.0
++Content-Type: text/plain; charset="utf-8"
++Content-Transfer-Encoding: 8bit
++
++Since the key is used for AES/3DES and HMAC operations only, this is
++safe. AES/3DES use keys in the 128- to 256-bit range, HMAC with
++MD5/SHA1/SHA2 should use keys with a minimum of 128- to 512-bit (in both
++cases, depending on the actual algorithm used).
++
++This reduction also keeps knet compatible with existing Corosync 2.x
++keyfiles, which are 1024-bit.
++
++Signed-off-by: Fabian Grünbichler <f.gruenbichler@proxmox.com>
++(cherry picked from commit 4e648f76930af8c376a833677d940b2b0efc3c86)
++---
++ libknet/libknet.h | 3 +--
++ 1 file changed, 1 insertion(+), 2 deletions(-)
++
++diff --git a/libknet/libknet.h b/libknet/libknet.h
++index 36fefa5..0331b1f 100644
++--- a/libknet/libknet.h
+++++ b/libknet/libknet.h
++@@ -587,8 +587,7 @@ int knet_handle_pmtud_get(knet_handle_t knet_h,
++ 				unsigned int *data_mtu);
++ 
++ 
++-
++-#define KNET_MIN_KEY_LEN  256
+++#define KNET_MIN_KEY_LEN  128
++ #define KNET_MAX_KEY_LEN 4096
++ 
++ struct knet_handle_crypto_cfg {
+diff --git a/debian/patches/tests-add-man-page-check-to-verify-doxy-header-order-and-.patch b/debian/patches/tests-add-man-page-check-to-verify-doxy-header-order-and-.patch
+new file mode 100644
+index 0000000..2ac3e8a
+--- /dev/null
++++ b/debian/patches/tests-add-man-page-check-to-verify-doxy-header-order-and-.patch
+@@ -0,0 +1,37 @@
++From: "Fabio M. Di Nitto" <fdinitto@redhat.com>
++Date: Tue, 30 Apr 2019 05:42:16 +0200
++Subject: [tests] add man page check to verify doxy header order and
++ definitions
++
++Signed-off-by: Fabio M. Di Nitto <fdinitto@redhat.com>
++(cherry picked from commit 8b73fbca799114ed579acb73ce0bbcdf45b1f171)
++---
++ man/api-to-man-page-coverage | 15 +++++++++++++++
++ 1 file changed, 15 insertions(+)
++
++diff --git a/man/api-to-man-page-coverage b/man/api-to-man-page-coverage
++index 92e60a5..b9dc18f 100755
++--- a/man/api-to-man-page-coverage
+++++ b/man/api-to-man-page-coverage
++@@ -14,6 +14,21 @@ target="$2"
++ headerapicalls="$(grep ${target}_ "$srcdir"/lib${target}/lib${target}.h | grep -v "^ \*" | grep -v ^struct | grep -v "^[[:space:]]" | grep -v typedef | sed -e 's/(.*//g' -e 's/^const //g' -e 's/\*//g' | awk '{print $2}')"
++ manpages="$(grep ${target}_ "$srcdir"/man/Makefile.am |grep -v man3 |grep -v xml | sed -e 's/\.3.*//g')"
++ 
+++echo "Checking for header format errors"
+++
+++for i in $headerapicalls; do
+++	echo "Checking $i"
+++	header="$(grep " \* ${i}$" "$srcdir"/lib${target}/lib${target}.h -A2)"
+++	brief="$(echo "$header" | tail -n 1 |grep "@brief")"
+++	if [ -z "$brief" ]; then
+++		echo "Error found in $i doxy header section"
+++		echo "$header"
+++		echo ""
+++		echo "$brief"
+++		exit 1
+++	fi
+++done
+++
++ echo "Checking for symbols in header file NOT distributed as manpages"
++ 
++ for i in $headerapicalls; do
+diff --git a/debian/patches/udp-improve-error-message-decoding-from-ICMP-errors.patch b/debian/patches/udp-improve-error-message-decoding-from-ICMP-errors.patch
+new file mode 100644
+index 0000000..876bdd3
+--- /dev/null
++++ b/debian/patches/udp-improve-error-message-decoding-from-ICMP-errors.patch
+@@ -0,0 +1,38 @@
++From: "Fabio M. Di Nitto" <fdinitto@redhat.com>
++Date: Wed, 1 May 2019 06:51:19 +0200
++Subject: [udp] improve error message decoding from ICMP errors
++
++Signed-off-by: Fabio M. Di Nitto <fdinitto@redhat.com>
++(cherry picked from commit c8522bfa627045932c0bd2c1b31005534efbc495)
++---
++ libknet/transport_udp.c | 10 +++++++++-
++ 1 file changed, 9 insertions(+), 1 deletion(-)
++
++diff --git a/libknet/transport_udp.c b/libknet/transport_udp.c
++index 3decb66..e4f6fdb 100644
++--- a/libknet/transport_udp.c
+++++ b/libknet/transport_udp.c
++@@ -296,6 +296,8 @@ static int read_errs_from_sock(knet_handle_t knet_h, int sockfd)
++ 	struct sockaddr_storage *origin;
++ 	char addr_str[KNET_MAX_HOST_LEN];
++ 	char port_str[KNET_MAX_PORT_LEN];
+++	char addr_remote_str[KNET_MAX_HOST_LEN];
+++	char port_remote_str[KNET_MAX_PORT_LEN];
++ 
++ 	iov.iov_base = &icmph;
++ 	iov.iov_len = sizeof(icmph);
++@@ -367,7 +369,13 @@ static int read_errs_from_sock(knet_handle_t knet_h, int sockfd)
++ 								log_debug(knet_h, KNET_SUB_TRANSP_UDP, "Received ICMP error from unknown source: %s", strerror(sock_err->ee_errno));
++ 
++ 							} else {
++-								log_debug(knet_h, KNET_SUB_TRANSP_UDP, "Received ICMP error from %s: %s", addr_str, strerror(sock_err->ee_errno));
+++								if (knet_addrtostr(&remote, sizeof(remote),
+++									       addr_remote_str, KNET_MAX_HOST_LEN,
+++									       port_remote_str, KNET_MAX_PORT_LEN) < 0) {
+++									log_debug(knet_h, KNET_SUB_TRANSP_UDP, "Received ICMP error from %s: %s destination unknown", addr_str, strerror(sock_err->ee_errno));
+++								} else {
+++									log_debug(knet_h, KNET_SUB_TRANSP_UDP, "Received ICMP error from %s: %s %s", addr_str, strerror(sock_err->ee_errno), addr_remote_str);
+++								}
++ 							}
++ 							break;
++ 					}
+diff --git a/debian/patches/udp-use-defines-vs-hardcoded-numbers.patch b/debian/patches/udp-use-defines-vs-hardcoded-numbers.patch
+new file mode 100644
+index 0000000..65a5d88
+--- /dev/null
++++ b/debian/patches/udp-use-defines-vs-hardcoded-numbers.patch
+@@ -0,0 +1,36 @@
++From: "Fabio M. Di Nitto" <fdinitto@redhat.com>
++Date: Wed, 1 May 2019 06:39:53 +0200
++Subject: [udp] use defines vs hardcoded numbers
++
++Signed-off-by: Fabio M. Di Nitto <fdinitto@redhat.com>
++(cherry picked from commit 77adcf11ee390cfc7158f3f05617beef980429d8)
++---
++ libknet/transport_udp.c | 8 ++++----
++ 1 file changed, 4 insertions(+), 4 deletions(-)
++
++diff --git a/libknet/transport_udp.c b/libknet/transport_udp.c
++index acfbab4..3decb66 100644
++--- a/libknet/transport_udp.c
+++++ b/libknet/transport_udp.c
++@@ -325,8 +325,8 @@ static int read_errs_from_sock(knet_handle_t knet_h, int sockfd)
++ 				sock_err = (struct sock_extended_err*)(void *)CMSG_DATA(cmsg);
++ 				if (sock_err) {
++ 					switch (sock_err->ee_origin) {
++-						case 0: /* no origin */
++-						case 1: /* local source (EMSGSIZE) */
+++						case SO_EE_ORIGIN_NONE: /* no origin */
+++						case SO_EE_ORIGIN_LOCAL: /* local source (EMSGSIZE) */
++ 							if (sock_err->ee_errno == EMSGSIZE) {
++ 								if (pthread_mutex_lock(&knet_h->kmtu_mutex) != 0) {
++ 									log_debug(knet_h, KNET_SUB_TRANSP_UDP, "Unable to get mutex lock");
++@@ -358,8 +358,8 @@ static int read_errs_from_sock(knet_handle_t knet_h, int sockfd)
++ 							 * those errors are way too noisy
++ 							 */
++ 							break;
++-						case 2: /* ICMP */
++-						case 3: /* ICMP6 */
+++						case SO_EE_ORIGIN_ICMP:  /* ICMP */
+++						case SO_EE_ORIGIN_ICMP6: /* ICMP6 */
++ 							origin = (struct sockaddr_storage *)(void *)SO_EE_OFFENDER(sock_err);
++ 							if (knet_addrtostr(origin, sizeof(origin),
++ 									   addr_str, KNET_MAX_HOST_LEN,
+diff --git a/debian/patches/series b/debian/patches/series
+index 7fbd139..c16ea6e 100644
+--- a/debian/patches/series
++++ b/debian/patches/series
+@@ -1 +1,11 @@
+ send-test-skip-the-SCTP-test-if-SCTP-is-not-supported-by-.patch
++build-add-another-exception-to-valgrind-nss-combo.patch
++reduce-minimum-crypto-key-size-to-1024bit.patch
++crypto-remove-libnss-3des-support.patch
++man-Tidy-manpages-215.patch
++man-Tidy-more-man-pages.patch
++man-fix-knet_host_set_policy-parameters-order.patch
++tests-add-man-page-check-to-verify-doxy-header-order-and-.patch
++man-fix-libknet.h-for-errors-detected-by-newly-added-test.patch
++udp-use-defines-vs-hardcoded-numbers.patch
++udp-improve-error-message-decoding-from-ICMP-errors.patch
