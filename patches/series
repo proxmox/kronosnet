@@ -3,3 +3,4 @@
 0003-cherry-pick-1.10-as-patches.patch
 0004-add-libzstd-dev-to-build-depends.patch
 0005-add-new-symbols-for-libknet-1.10.patch
+0006-cherry-pick-pmtud-fixes.patch
