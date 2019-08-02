@@ -1,6 +1,6 @@
 VERSION=1.10
 DEBRELEASE=0+really1.8-2
-PVERELEASE=pve1~bpo9
+PVERELEASE=pve2~bpo9
 
 BUILDDIR=kronosnet-${VERSION}
 SRCARCHIVE=kronosnet_${VERSION}.orig.tar.xz
