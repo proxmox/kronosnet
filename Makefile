@@ -15,12 +15,13 @@ OTHER_DEBS=								\
 	libknet1-dbgsym_${VERSION}-${PVERELEASE}_${ARCH}.deb		\
 	libnozzle1-dbgsym_${VERSION}-${PVERELEASE}_${ARCH}.deb		\
 	libnozzle-dev_${VERSION}-${PVERELEASE}_${ARCH}.deb		\
+	libnozzle1_${VERSION}-${PVERELEASE}_${ARCH}.deb
 
 DEBS=${MAIN_DEB} ${OTHER_DEBS}
 DSC=kronosnet-${VERSION}-${PVERELEASE}.dsc
 
-all: ${DEBS}
-	echo ${DEBS}
+all:
+	ls -1 ${DEBS}
 
 ${BUILDDIR}: upstream/${SRCARCHIVE} upstream/${DEBARCHIVE} patches/*
 	rm -rf ${BUILDDIR}
