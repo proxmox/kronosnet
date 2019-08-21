@@ -1,3 +1,9 @@
+kronosnet (1.11-pve1) pve; urgency=medium
+
+  * update to 1.11
+
+ -- Proxmox Support Team <support@proxmox.com>  Wed, 21 Aug 2019 16:53:40 +0200
+
 kronosnet (1.10-pve2) pve; urgency=medium
 
   * cherry-pick pmtud fixes
