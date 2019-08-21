@@ -1,0 +1,28 @@
+From: =?utf-8?q?Ferenc_W=C3=A1gner?= <wferi@debian.org>
+Date: Wed, 3 Apr 2019 10:26:11 +0200
+Subject: send test: skip the SCTP test if SCTP is not supported by the kernel
+
+For example, module loading is disabled on Debian build daemons.
+---
+ libknet/tests/api_knet_send.c | 3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
+
+diff --git a/libknet/tests/api_knet_send.c b/libknet/tests/api_knet_send.c
+index f241201..1c55db1 100644
+--- a/libknet/tests/api_knet_send.c
++++ b/libknet/tests/api_knet_send.c
+@@ -173,12 +173,13 @@ static void test(uint8_t transport)
+ 	}
+ 
+ 	if (knet_link_set_config(knet_h, 1, 0, transport, &lo, &lo, 0) < 0) {
++		int exit_status = transport == KNET_TRANSPORT_SCTP && errno == EPROTONOSUPPORT ? SKIP : FAIL;
+ 		printf("Unable to configure link: %s\n", strerror(errno));
+ 		knet_host_remove(knet_h, 1);
+ 		knet_handle_free(knet_h);
+ 		flush_logs(logfds[0], stdout);
+ 		close_logpipes(logfds);
+-		exit(FAIL);
++		exit(exit_status);
+ 	}
+ 
+ 	if (knet_link_set_enable(knet_h, 1, 0, 1) < 0) {

@@ -1,0 +1,3 @@
+usr/include/libnozzle.h
+usr/lib/*/libnozzle.so
+usr/lib/*/pkgconfig/libnozzle.pc

@@ -4,7 +4,6 @@ PVERELEASE=pve2~bpo9
 
 BUILDDIR=kronosnet-${VERSION}
 SRCARCHIVE=kronosnet_${VERSION}.orig.tar.xz
-DEBARCHIVE=kronosnet_${VERSION}-${DEBRELEASE}.debian.tar.xz
 
 ARCH:=$(shell dpkg-architecture -qDEB_BUILD_ARCH)
 
@@ -23,12 +22,12 @@ DSC=kronosnet-${VERSION}-${PVERELEASE}.dsc
 all:
 	ls -1 ${DEBS}
 
-${BUILDDIR}: upstream/${SRCARCHIVE} upstream/${DEBARCHIVE} patches/*
+${BUILDDIR}: upstream/${SRCARCHIVE} patches/*
 	rm -rf ${BUILDDIR}
 	mkdir ${BUILDDIR}
 	ln -sf upstream/${SRCARCHIVE} ${SRCARCHIVE}
 	tar -x -C ${BUILDDIR} --strip-components=1 -f upstream/${SRCARCHIVE}
-	tar -C ${BUILDDIR} -xf upstream/${DEBARCHIVE}
+	cp -a debian/ ${BUILDDIR}
 	cd ${BUILDDIR}; ln -s ../patches patches
 	cd ${BUILDDIR}; quilt push -a
 	cd ${BUILDDIR}; rm -rf .pc ./patches
