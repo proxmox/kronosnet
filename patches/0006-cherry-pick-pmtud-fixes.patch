@@ -246,10 +246,8 @@ diff --git a/debian/patches/series b/debian/patches/series
 index e58890e..c5950b7 100644
 --- a/debian/patches/series
 +++ b/debian/patches/series
-@@ -75,3 +75,7 @@ crypto-hide-errors-generated-by-openssl-1.1.1c.patch
- doc-fix-a-merge-oversight-from-541d7faf9068d10e12b4278c35.patch
- global-clarify-license-entry-per-file-to-match-README.lic.patch
- global-update-copyrights.patch
+@@ -1,1 +1,5 @@ crypto-hide-errors-generated-by-openssl-1.1.1c.patch
+ send-test-skip-the-SCTP-test-if-SCTP-is-not-supported-by-.patch
 +crypto-fix-log-information.patch
 +udp-log-information-about-detected-kernel-MTU.patch
 +docs-add-knet-packet-layout.patch
