@@ -1,0 +1,152 @@
+kronosnet (1.8-2) unstable; urgency=medium
+
+  * [b6a2cdc] New patch: send test: skip the SCTP test if SCTP is not supported
+    by the kernel
+
+ -- Ferenc Wágner <wferi@debian.org>  Wed, 03 Apr 2019 10:33:30 +0200
+
+kronosnet (1.8-1) unstable; urgency=medium
+
+  * [ff7beff] New upstream release (1.8)
+  * [21d7565] Update copyright years
+
+ -- Ferenc Wágner <wferi@debian.org>  Mon, 01 Apr 2019 23:59:14 +0200
+
+kronosnet (1.7-1) unstable; urgency=medium
+
+  * [4e5fcde] New upstream release (1.7)
+  * [f23dac4] Delete our patches, they went upstream
+
+ -- Ferenc Wágner <wferi@debian.org>  Thu, 31 Jan 2019 19:06:49 +0100
+
+kronosnet (1.6-4) unstable; urgency=medium
+
+  * [50a96b8] Fix ugly assignment bug in my patch
+
+ -- Ferenc Wágner <wferi@debian.org>  Fri, 28 Dec 2018 10:21:26 +0100
+
+kronosnet (1.6-3) unstable; urgency=medium
+
+  * [c2eec28] New patch: Fix nozzle man dates to SOURCE_EPOCH, just like the
+    libknet ones are
+
+ -- Ferenc Wágner <wferi@debian.org>  Wed, 26 Dec 2018 11:00:26 +0100
+
+kronosnet (1.6-2) unstable; urgency=medium
+
+  * [121d257] New patch: Skip SCTP event initialization if the protocol is not
+    supported
+  * [7112630] Run libknet unit tests as autopkgtests, too.
+    Buildds lack SCTP support, so this is more comprehensive.
+  * [62e62e6] Update Standards-Version to 4.3.0 (no changes required)
+  * [45b1073] Add libnozzle autopkgtests.
+    The libnozzle tests are all skipped during the build because they need
+    root privileges.
+
+ -- Ferenc Wágner <wferi@debian.org>  Mon, 24 Dec 2018 02:12:39 +0100
+
+kronosnet (1.6-1) unstable; urgency=medium
+
+  * [640f767] New upstream release (1.6)
+  * [c9f9431] Revert "New patch: Try to be compatible with earlier kernels"
+    Kronosnet 1.6 fixed this in a better way.
+  * [4c9b44c] Update copyright years and libnozzle name
+  * [435f2f8] New binary packages: libnozzle1 and libnozzle-dev
+    libnozzle requires libnl-3 and libnl-route-3
+  * [65f93be] Extend the long description of Kronosnet
+  * [37dc7b7] Suggest the documentation from libknet-dev
+  * [16cfc1b] Ship README and COPYRIGHT in all binary packages
+  * [d8b5f19] New patch: Install the nozzle man pages
+  * [5e01b4c] The nozzle man pages are in libknet-doc.
+    It isn't worth introducing a new binary package for.
+  * [b513715] New patch: Fix typos
+
+ -- Ferenc Wágner <wferi@debian.org>  Wed, 19 Dec 2018 11:59:23 +0100
+
+kronosnet (1.5-1) unstable; urgency=medium
+
+  * [055d424] Use the 'replace' merge mode.
+    The debian directory is not upstream territory, so this is safer.
+  * [89d5ff1] New upstream release (1.5)
+  * [ebf50a1] Update debian/copyright
+  * [8f34d31] New patch: Try to be compatible with earlier kernels
+
+ -- Ferenc Wágner <wferi@debian.org>  Tue, 27 Nov 2018 13:41:40 +0100
+
+kronosnet (1.4-1) unstable; urgency=medium
+
+  * [25262ef] New upstream release (1.4)
+  * [f98fbaa] Update Standards-Version to 4.2.1 (no changes required)
+
+ -- Ferenc Wágner <wferi@debian.org>  Sat, 22 Sep 2018 18:02:02 +0200
+
+kronosnet (1.3-1) unstable; urgency=medium
+
+  * [a52437e] New upstream release (1.2)
+  * [78b1a8e] The upstream build system already handles SOURCE_DATE_EPOCH
+  * [3fc0634] Update Standards-Version to 4.1.4 (no changes required)
+  * [428a983] New upstream release (1.3)
+
+ -- Ferenc Wágner <wferi@debian.org>  Tue, 08 May 2018 20:29:23 +0200
+
+kronosnet (1.1-2) unstable; urgency=medium
+
+  * [db289c1] New patch reproducible-build.patch
+    Thanks to Chris Lamb (Closes: #892021)
+
+ -- Ferenc Wágner <wferi@debian.org>  Sun, 04 Mar 2018 17:25:53 +0100
+
+kronosnet (1.1-1) unstable; urgency=medium
+
+  * [39a7e15] Revert "GCC already uses SOURCE_DATE_EPOCH"
+    This reverts commit 7611955b1e867624f3f1ab6810e3434c544426d0.
+    Since configure adds -Werror to CFLAGS by default, the -Wdate-time added
+    by dpkg-buildflags broke the build, but unnecessarily: modern gcc
+    already uses SOURCE_DATE_EPOCH, so reproducibility wasn't broken.
+    However, setting CFLAGS directly wasn't a good idea, since it dropped
+    the useful (mostly hardening) options as well.
+    As the __TIME__ and __DATE__ macros are used in the kronosnetd code
+    only, which isn't compiled by default, this setting had better go.
+  * [7d0af74] Pristine-tar is used by several gbp subcommands
+  * [490655d] New upstream release 1.1 (Closes: #886973)
+  * [9b89566] Drop upstreamed patches
+  * [5391160] Don't try building Kronosnet on the Hurd.
+    It misses both epoll and kevent, our two options. (Closes: #886972)
+  * [a532e65] The test suite can already run unprivileged
+  * [17d7e7c] Older liblz4 versions are also supported now
+  * [f80a59a] Use the official project description
+  * [7df074f] Split out the man pages into libknet-doc.
+    Building the documentation (man pages) requires extra dependencies and
+    effort, spare it if possible.
+  * [2fe8f33] Make --as-needed effective by patching libtool
+  * [750d039] Switch to dh_missing
+
+ -- Ferenc Wágner <wferi@debian.org>  Sun, 25 Feb 2018 17:59:44 +0100
+
+kronosnet (1.0-1) unstable; urgency=medium
+
+  * [f1fd87b] New upstream release (1.0)
+  * [7c1d7d2] Remove upstreamed patches, refresh the rest
+  * [327ea77] New patch: Give Hurd a chance
+  * [a89012a] Update Standards-Version to 4.1.3 (no changes required)
+  * [384b59c] Host the packaging repository on salsa.debian.org
+  * [07215f5] The required lz4 version is still experimental only
+  * [fd6c2bd] Switch to Debhelper compat level 11 (no changes required)
+  * Upload to unstable.
+
+ -- Ferenc Wágner <wferi@debian.org>  Tue, 09 Jan 2018 01:37:53 +0100
+
+kronosnet (0.9-2) experimental; urgency=medium
+
+  * [5b8fc8e] Further description updates will also be needed
+  * [b61fb92] netinet/sctp.h isn't in separate package on BSD
+  * [6d4aea9] New patch: tests: skip the SCTP test if SCTP is not
+    supported by the kernel
+
+ -- Ferenc Wágner <wferi@debian.org>  Tue, 02 Jan 2018 00:36:31 +0100
+
+kronosnet (0.9-1) experimental; urgency=medium
+
+  * Initial release. (Closes: #879824)
+
+ -- Ferenc Wágner <wferi@debian.org>  Sun, 17 Dec 2017 23:44:28 +0100

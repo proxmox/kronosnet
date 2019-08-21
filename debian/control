@@ -1,0 +1,115 @@
+Source: kronosnet
+Section: admin
+Priority: optional
+Maintainer: Debian HA Maintainers <debian-ha-maintainers@lists.alioth.debian.org>
+Uploaders:
+ Ferenc Wágner <wferi@debian.org>,
+Standards-Version: 4.3.0
+Build-Depends:
+ debhelper (>= 11~),
+ libnl-3-dev,
+ libnl-route-3-dev,
+ libsctp-dev [linux-any],
+ pkg-config,
+# Compress plugins:
+ libbz2-dev,
+ liblz4-dev,
+ liblzma-dev,
+ liblzo2-dev,
+ zlib1g-dev,
+# Crypto plugins:
+ libnss3-dev,
+ libnspr4-dev,
+ libssl-dev,
+Build-Depends-Indep:
+ doxygen,
+ libqb-dev,
+ libxml2-dev,
+Homepage: https://kronosnet.org/
+Vcs-Git: https://salsa.debian.org/ha-team/kronosnet.git
+Vcs-Browser: https://salsa.debian.org/ha-team/kronosnet
+X-Common-Description: Kronosnet, often referred to as knet, is a network
+ abstraction layer designed for High Availability use cases, where redundancy,
+ security, fault tolerance and fast fail-over are the core requirements of
+ your application.
+ .
+ Kronosnet is the new underlying network protocol for Linux HA components
+ (Corosync), that features ability to use multiple links between nodes,
+ active/active and active/passive link failover policies, automatic link
+ recovery, FIPS compliant encryption (nss and/or openssl), automatic PMTUd and
+ in general better performances compared to the old network protocol.
+X-Nozzle-Description: This is an over-engineered commodity library to manage a
+ pool of tap devices and provides the basic
+ pre-up.d/up.d/down.d/post-down.d infrastructure.
+
+Package: libknet-dev
+Section: libdevel
+# Hurd misses both epoll and kevent:
+Architecture: linux-any kfreebsd-any
+Multi-Arch: same
+Depends:
+ libknet1 (= ${binary:Version}),
+ ${misc:Depends},
+Suggests:
+ libknet-doc (= ${binary:Version}),
+Description: kronosnet core switching implementation (developer files)
+ ${S:X-Common-Description}
+ .
+ This package contains header files required to build libknet clients.
+
+Package: libknet-doc
+Section: doc
+Architecture: all
+Multi-Arch: foreign
+Depends:
+ ${misc:Depends},
+# The man pages originally shipped in libknet-dev:
+Breaks:
+ libknet-dev (<< 1.1),
+Replaces:
+ libknet-dev (<< 1.1),
+Description: kronosnet core API documentation
+ ${S:X-Common-Description}
+ .
+ This package contains the man pages of the API functions.
+
+Package: libknet1
+Section: libs
+# Hurd misses both epoll and kevent:
+Architecture: linux-any kfreebsd-any
+Multi-Arch: same
+Depends:
+ ${misc:Depends},
+ ${shlibs:Depends},
+Description: kronosnet core switching implementation
+ ${S:X-Common-Description}
+ .
+ This package contains libraries that are used by libknet clients.
+
+Package: libnozzle-dev
+Section: libdevel
+# Hurd misses both epoll and kevent:
+Architecture: linux-any kfreebsd-any
+Multi-Arch: same
+Depends:
+ libnozzle1 (= ${binary:Version}),
+ ${misc:Depends},
+Suggests:
+ libknet-doc (= ${binary:Version}),
+Description: userland wrapper around kernel tap devices (developer files)
+ ${S:X-Nozzle-Description}
+ .
+ This package contains header files required to build libnozzle clients.
+
+Package: libnozzle1
+Section: libs
+# Hurd misses both epoll and kevent:
+Architecture: linux-any kfreebsd-any
+Multi-Arch: same
+Depends:
+ ${misc:Depends},
+ ${shlibs:Depends},
+Description: userland wrapper around kernel tap devices
+ ${S:X-Nozzle-Description}
+ .
+ This package contains libraries that are used by libnozzle clients.
