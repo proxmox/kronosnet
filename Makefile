@@ -3,7 +3,7 @@ DEBRELEASE=0+really1.8-2
 PVERELEASE=pve2
 
 BUILDDIR=kronosnet-${VERSION}
-SRCARCHIVE=kronosnet_${VERSION}.orig.tar.xz
+SRC_SUBMODULE=upstream
 
 ARCH:=$(shell dpkg-architecture -qDEB_BUILD_ARCH)
 
@@ -22,11 +22,9 @@ DSC=kronosnet-${VERSION}-${PVERELEASE}.dsc
 all:
 	ls -1 ${DEBS}
 
-${BUILDDIR}: upstream/${SRCARCHIVE} patches/*
+${BUILDDIR}: upstream/README patches/*
 	rm -rf ${BUILDDIR}
-	mkdir ${BUILDDIR}
-	ln -sf upstream/${SRCARCHIVE} ${SRCARCHIVE}
-	tar -x -C ${BUILDDIR} --strip-components=1 -f upstream/${SRCARCHIVE}
+	cp -a upstream ${BUILDDIR}
 	cp -a debian/ ${BUILDDIR}
 	cd ${BUILDDIR}; ln -s ../patches patches
 	cd ${BUILDDIR}; quilt push -a
@@ -42,11 +40,10 @@ dsc: ${DSC}
 ${DSC}: ${BUILDDIR}
 	cd ${BUILDDIR}; dpkg-buildpackage -S -us -uc -d -nc
 
-download:
-	rm -rf upstream/
-	mkdir upstream
-	cd upstream; dget https://deb.debian.org/debian/pool/main/k/kronosnet/kronosnet_${VERSION}-${DEBRELEASE}.dsc
-	cd upstream; rm -rf *.asc *.dsc ${BUILDDIR}
+# make sure submodules were initialized
+.PHONY: submodule
+submodule:
+	test -f "${SRC_SUBMODULE}/README" || git submodule update --init ${SRC_SUBMODULE}
 
 .PHONY: upload
 upload: ${DEBS}
