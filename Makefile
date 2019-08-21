@@ -22,13 +22,10 @@ DSC=kronosnet-${VERSION}-${PVERELEASE}.dsc
 all:
 	ls -1 ${DEBS}
 
-${BUILDDIR}: upstream/README patches/*
+${BUILDDIR}: upstream/README
 	rm -rf ${BUILDDIR}
 	cp -a upstream ${BUILDDIR}
 	cp -a debian/ ${BUILDDIR}
-	cd ${BUILDDIR}; ln -s ../patches patches
-	cd ${BUILDDIR}; quilt push -a
-	cd ${BUILDDIR}; rm -rf .pc ./patches
 
 deb: ${DEBS}
 ${OTHER_DEBS}: ${MAIN_DEB}
