@@ -24,6 +24,7 @@ libknet.so.1 libknet1 #MINVER#
  knet_handle_new_ex@LIBKNET 1.1
  knet_handle_pmtud_get@LIBKNET 0.9
  knet_handle_pmtud_getfreq@LIBKNET 0.9
+ knet_handle_pmtud_set@LIBKNET 1.11
  knet_handle_pmtud_setfreq@LIBKNET 0.9
  knet_handle_remove_datafd@LIBKNET 0.9
  knet_handle_set_transport_reconnect_interval@LIBKNET 0.9
