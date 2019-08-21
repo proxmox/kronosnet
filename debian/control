@@ -16,6 +16,7 @@ Build-Depends:
  liblz4-dev,
  liblzma-dev,
  liblzo2-dev,
+ libzstd-dev,
  zlib1g-dev,
 # Crypto plugins:
  libnss3-dev,
