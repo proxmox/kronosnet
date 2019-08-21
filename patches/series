@@ -1,4 +1,3 @@
-0001-update-changelog.patch
 0002-cherry-pick-1.9-as-patches.patch
 0003-cherry-pick-1.10-as-patches.patch
 0004-add-libzstd-dev-to-build-depends.patch

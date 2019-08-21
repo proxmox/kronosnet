@@ -1,3 +1,23 @@
+kronosnet (1.10-pve2) pve; urgency=medium
+
+  * cherry-pick pmtud fixes
+
+ -- Proxmox Support Team <support@proxmox.com>  Fri, 2 Aug 2019 10:53:46 +0200
+
+kronosnet (1.10-pve1) pve; urgency=medium
+
+  * update to 1.10
+
+ -- Proxmox Support Team <support@proxmox.com>  Wed, 19 Jun 2019 09:32:21 +0200
+
+kronosnet (1.8-pve1) pve; urgency=medium
+
+  * introduce kronosnet for PVE 6.x
+
+  * cherry-pick crypto patches for Corosync 2.x keyfile compat
+
+ -- Proxmox Support Team <support@proxmox.com>  Wed, 22 May 2019 14:08:15 +0200
+
 kronosnet (1.8-2) unstable; urgency=medium
 
   * [b6a2cdc] New patch: send test: skip the SCTP test if SCTP is not supported
