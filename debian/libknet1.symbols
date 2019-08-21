@@ -11,6 +11,7 @@ libknet.so.1 libknet1 #MINVER#
  knet_handle_clear_stats@LIBKNET 0.9
  knet_handle_compress@LIBKNET 0.9
  knet_handle_crypto@LIBKNET 0.9
+ knet_handle_enable_access_lists@LIBKNET 1.10
  knet_handle_enable_filter@LIBKNET 0.9
  knet_handle_enable_pmtud_notify@LIBKNET 0.9
  knet_handle_enable_sock_notify@LIBKNET 0.9
@@ -37,6 +38,8 @@ libknet.so.1 libknet1 #MINVER#
  knet_host_remove@LIBKNET 0.9
  knet_host_set_name@LIBKNET 0.9
  knet_host_set_policy@LIBKNET 0.9
+ knet_link_add_acl@LIBKNET 1.10
+ knet_link_clear_acl@LIBKNET 1.10
  knet_link_clear_config@LIBKNET 0.9
  knet_link_get_config@LIBKNET 0.9
  knet_link_get_enable@LIBKNET 0.9
@@ -45,6 +48,8 @@ libknet.so.1 libknet1 #MINVER#
  knet_link_get_pong_count@LIBKNET 0.9
  knet_link_get_priority@LIBKNET 0.9
  knet_link_get_status@LIBKNET 0.9
+ knet_link_insert_acl@LIBKNET 1.10
+ knet_link_rm_acl@LIBKNET 1.10
  knet_link_set_config@LIBKNET 0.9
  knet_link_set_enable@LIBKNET 0.9
  knet_link_set_ping_timers@LIBKNET 0.9
