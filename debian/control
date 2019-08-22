@@ -6,7 +6,7 @@ Uploaders:
  Ferenc Wágner <wferi@debian.org>,
 Standards-Version: 4.3.0
 Build-Depends:
- debhelper (>= 11~),
+ debhelper (>= 10~),
  libnl-3-dev,
  libnl-route-3-dev,
  libsctp-dev [linux-any],
