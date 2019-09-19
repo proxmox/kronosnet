@@ -1,3 +1,9 @@
+kronosnet (1.11-pve2) pve; urgency=medium
+
+  * add fix for memory corryption of link structure, related to #2326
+
+ -- Proxmox Support Team <support@proxmox.com>  Thu, 19 Sep 2019 10:59:00 +0200
+
 kronosnet (1.11-pve1) pve; urgency=medium
 
   * update to 1.11
