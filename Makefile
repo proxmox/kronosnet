@@ -1,5 +1,5 @@
 VERSION=1.11
-PVERELEASE=pve1~bpo9
+PVERELEASE=pve2~bpo9
 
 BUILDDIR=kronosnet-${VERSION}
 SRC_SUBMODULE=upstream
