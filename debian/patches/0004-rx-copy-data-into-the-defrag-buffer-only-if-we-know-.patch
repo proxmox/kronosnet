@@ -1,0 +1,30 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: "Fabio M. Di Nitto" <fdinitto@redhat.com>
+Date: Tue, 15 Oct 2019 07:02:05 +0200
+Subject: [PATCH] [rx] copy data into the defrag buffer only if we know the
+ size of the frame
+
+Signed-off-by: Fabio M. Di Nitto <fdinitto@redhat.com>
+(cherry picked from commit 8b2863b392d275ea50fa19e8e8bebe40a6134707)
+Signed-off-by: Thomas Lamprecht <t.lamprecht@proxmox.com>
+---
+ libknet/threads_rx.c | 6 ++++--
+ 1 file changed, 4 insertions(+), 2 deletions(-)
+
+diff --git a/libknet/threads_rx.c b/libknet/threads_rx.c
+index e8fe264..ef0c2cc 100644
+--- a/libknet/threads_rx.c
++++ b/libknet/threads_rx.c
+@@ -186,8 +186,10 @@ static int pckt_defrag(knet_handle_t knet_h, struct knet_header *inbuf, ssize_t
+ 		defrag_buf->frag_size = *len;
+ 	}
+ 
+-	memmove(defrag_buf->buf + ((inbuf->khp_data_frag_seq - 1) * defrag_buf->frag_size),
+-	       inbuf->khp_data_userdata, *len);
++	if (defrag_buf->frag_size) {
++		memmove(defrag_buf->buf + ((inbuf->khp_data_frag_seq - 1) * defrag_buf->frag_size),
++		       inbuf->khp_data_userdata, *len);
++	}
+ 
+ 	defrag_buf->frag_recv++;
+ 	defrag_buf->frag_map[inbuf->khp_data_frag_seq] = 1;
