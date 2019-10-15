@@ -1,27 +1,29 @@
-VERSION=1.12
-PVERELEASE=pve1
+include /usr/share/dpkg/pkg-info.mk
+include /usr/share/dpkg/architecture.mk
+
+VERSION=${DEB_VERSION_UPSTREAM}
 
 BUILDDIR=kronosnet-${VERSION}
 SRC_SUBMODULE=upstream
 
-ARCH:=$(shell dpkg-architecture -qDEB_BUILD_ARCH)
+ARCH=${DEB_BUILD_ARCH}
 
-MAIN_DEB=libknet1_${VERSION}-${PVERELEASE}_${ARCH}.deb
+MAIN_DEB=libknet1_${DEB_VERSION}_${ARCH}.deb
 OTHER_DEBS=								\
-	libknet-dev_${VERSION}-${PVERELEASE}_${ARCH}.deb			\
-	libknet-doc_${VERSION}-${PVERELEASE}_all.deb			\
-	libknet1-dbgsym_${VERSION}-${PVERELEASE}_${ARCH}.deb		\
-	libnozzle1-dbgsym_${VERSION}-${PVERELEASE}_${ARCH}.deb		\
-	libnozzle-dev_${VERSION}-${PVERELEASE}_${ARCH}.deb		\
-	libnozzle1_${VERSION}-${PVERELEASE}_${ARCH}.deb
+	libknet-dev_${DEB_VERSION}_${ARCH}.deb			\
+	libknet-doc_${DEB_VERSION}_all.deb			\
+	libknet1-dbgsym_${DEB_VERSION}_${ARCH}.deb		\
+	libnozzle1-dbgsym_${DEB_VERSION}_${ARCH}.deb		\
+	libnozzle-dev_${DEB_VERSION}_${ARCH}.deb		\
+	libnozzle1_${DEB_VERSION}_${ARCH}.deb
 
 DEBS=${MAIN_DEB} ${OTHER_DEBS}
-DSC=kronosnet-${VERSION}-${PVERELEASE}.dsc
+DSC=kronosnet-${DEB_VERSION}.dsc
 
 all:
 	ls -1 ${DEBS}
 
-${BUILDDIR}: upstream/README
+${BUILDDIR}: ${SRC_SUBMODULE}/README
 	rm -rf ${BUILDDIR}
 	cp -a upstream ${BUILDDIR}
 	cp -a debian/ ${BUILDDIR}
