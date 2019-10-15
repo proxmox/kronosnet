@@ -1,0 +1,96 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: "Fabio M. Di Nitto" <fdinitto@redhat.com>
+Date: Tue, 15 Oct 2019 06:53:24 +0200
+Subject: [PATCH] [host] fix defrag buffers reclaim logic
+
+The problem:
+
+- let's assume a 2 nodes (A and B) cluster setup
+- node A sends fragmented packets to node B and there is
+  packet loss on the network.
+- node B receives all those fragments and attempts to
+  reassemble them.
+- node A sends packet seq_num X in Y fragments.
+- node B receives only part of the fragments and stores
+  them in a defrag buf.
+- packet loss stops.
+- node A continues to send packets and a seq_num
+  roll-over takes place.
+- node A sends a new packet seq_num X in Y fragments.
+- node B gets confused here because the parts of the old
+  packet seq_num X are still stored and the buffer
+  has not been reclaimed.
+- node B continues to rebuild packet seq_num X with
+  old stale data and new data from after the roll-over.
+- node B completes reassembling the packet and delivers
+  junk to the application.
+
+The solution:
+
+Add a much stronger buffer reclaim logic that will apply
+on each received packet and not only when defrag buffers
+are needed, as there might be a mix of fragmented and not
+fragmented packets in-flight.
+
+The new logic creates a window of N packets that can be
+handled at the same time (based on the number of buffers)
+and clear everything else.
+
+Fixes https://github.com/kronosnet/kronosnet/issues/261
+
+Signed-off-by: Fabio M. Di Nitto <fdinitto@redhat.com>
+(cherry picked from commit 3fb0166ebd14e37a2fb9fe7aeae53d09e0e66b74)
+Signed-off-by: Thomas Lamprecht <t.lamprecht@proxmox.com>
+---
+ libknet/host.c | 31 +++++++++++++++++++++++++++++++
+ 1 file changed, 31 insertions(+)
+
+diff --git a/libknet/host.c b/libknet/host.c
+index ac26b89..85d4626 100644
+--- a/libknet/host.c
++++ b/libknet/host.c
+@@ -562,6 +562,35 @@ static void _clear_cbuffers(struct knet_host *host, seq_num_t rx_seq_num)
+ 	}
+ }
+ 
++static void _reclaim_old_defrag_bufs(struct knet_host *host, seq_num_t seq_num)
++{
++	seq_num_t head, tail; /* seq_num boundaries */
++	int i;
++
++	head = seq_num + 1;
++	tail = seq_num - (KNET_MAX_LINK + 1);
++
++	/*
++	 * expire old defrag buffers
++	 */
++	for (i = 0; i < KNET_MAX_LINK; i++) {
++		if (host->defrag_buf[i].in_use) {
++			/*
++			 * head has done a rollover to 0+
++			 */
++			if (tail > head) {
++				if ((host->defrag_buf[i].pckt_seq >= head) && (host->defrag_buf[i].pckt_seq <= tail)) {
++					host->defrag_buf[i].in_use = 0;
++				}
++			} else {
++				if ((host->defrag_buf[i].pckt_seq >= head) || (host->defrag_buf[i].pckt_seq <= tail)){
++					host->defrag_buf[i].in_use = 0;
++				}
++			}
++		}
++	}
++}
++
+ /*
+  * check if a given packet seq num is in the circular buffers
+  * defrag_buf = 0 -> use normal cbuf 1 -> use the defrag buffer lookup
+@@ -579,6 +608,8 @@ int _seq_num_lookup(struct knet_host *host, seq_num_t seq_num, int defrag_buf, i
+ 		_clear_cbuffers(host, seq_num);
+ 	}
+ 
++	_reclaim_old_defrag_bufs(host, seq_num);
++
+ 	if (seq_num < *dst_seq_num) {
+ 		seq_dist =  (SEQ_MAX - seq_num) + *dst_seq_num;
+ 	} else {
