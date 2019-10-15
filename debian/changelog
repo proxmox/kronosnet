@@ -1,3 +1,15 @@
+kronosnet (1.12-pve2~bpo9) pve; urgency=medium
+
+  * invalidate bad MTUs detected on overloaded links. Never go below minimum
+    possible MTU to avoid to high packet fragmentation. Rather mark link as
+    down and trigger a new PMTU detection cycle.
+
+  * improve defragmentation buffer reclaim logic. This avoids situations where
+    packet loss, together with packet sequence overflow, can trigger a
+    problematic packet re-assembly with wrong fragments.
+
+ -- Proxmox Support Team <support@proxmox.com>  Tue, 15 Oct 2019 13:15:33 +0200
+
 kronosnet (1.12-pve1~bpo9) pve; urgency=medium
 
   * update to v1.12 stable release
