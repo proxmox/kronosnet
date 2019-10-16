@@ -1,3 +1,9 @@
+kronosnet (1.13-pve1) pve; urgency=medium
+
+  * update to upstream stable v1.13 release, drops downstream patchers to zero.
+
+ -- Proxmox Support Team <support@proxmox.com>  Wed, 16 Oct 2019 17:28:21 +0200
+
 kronosnet (1.12-pve2) pve; urgency=medium
 
   * invalidate bad MTUs detected on overloaded links. Never go below minimum
