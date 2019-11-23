@@ -1,7 +1,7 @@
 Source: kronosnet
 Section: admin
 Priority: optional
-Maintainer: Debian HA Maintainers <debian-ha-maintainers@lists.alioth.debian.org>
+Maintainer: Proxmox Support Team <support@proxmox.com>
 Uploaders:
  Ferenc Wágner <wferi@debian.org>,
 Standards-Version: 4.3.0
