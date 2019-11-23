@@ -2,8 +2,6 @@ Source: kronosnet
 Section: admin
 Priority: optional
 Maintainer: Proxmox Support Team <support@proxmox.com>
-Uploaders:
- Ferenc Wágner <wferi@debian.org>,
 Standards-Version: 4.3.0
 Build-Depends:
  debhelper (>= 11~),
