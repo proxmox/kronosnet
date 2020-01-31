@@ -1,3 +1,16 @@
+kronosnet (1.14-pve1) pve; urgency=medium
+
+  * update to upstream stable v1.14 release
+
+  * improve SCTP transport support
+
+  * udp: don't make socket spin if a network I/F is down
+
+  * fix incorrect math that could lead to bad latency calculation and unify
+    latency values to a capped value to link precision
+
+ -- Proxmox Support Team <support@proxmox.com>  Fri, 31 Jan 2020 20:08:06 +0100
+
 kronosnet (1.13-pve1) pve; urgency=medium
 
   * update to upstream stable v1.13 release, drops downstream patchers to zero.
