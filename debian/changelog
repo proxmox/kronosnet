@@ -1,3 +1,17 @@
+kronosnet (1.15-pve1) pve; urgency=medium
+
+  * Fix major interaction issues between applications gathering statistics
+    and PMTUd
+
+  * Fix UDP socket options that could lead to knet not being properly
+    functional
+
+  * Man pages updates
+
+  * Minor bug fixes
+
+ -- Proxmox Support Team <support@proxmox.com>  Thu, 05 Mar 2020 07:53:56 +0100
+
 kronosnet (1.14-pve1) pve; urgency=medium
 
   * update to upstream stable v1.14 release
