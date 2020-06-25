@@ -1,3 +1,9 @@
+kronosnet (1.16-pve1) pve; urgency=medium
+
+  * update to v1.16 upstream release
+
+ -- Proxmox Support Team <support@proxmox.com>  Thu, 25 Jun 2020 16:47:57 +0200
+
 kronosnet (1.15-pve1) pve; urgency=medium
 
   * Fix major interaction issues between applications gathering statistics
