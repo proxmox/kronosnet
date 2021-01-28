@@ -11,6 +11,9 @@ libknet.so.1 libknet1 #MINVER#
  knet_handle_clear_stats@LIBKNET 0.9
  knet_handle_compress@LIBKNET 0.9
  knet_handle_crypto@LIBKNET 0.9
+ knet_handle_crypto_rx_clear_traffic@LIBKNET 1.18
+ knet_handle_crypto_set_config@LIBKNET 1.18
+ knet_handle_crypto_use_config@LIBKNET 1.18
  knet_handle_enable_access_lists@LIBKNET 1.10
  knet_handle_enable_filter@LIBKNET 0.9
  knet_handle_enable_pmtud_notify@LIBKNET 0.9
