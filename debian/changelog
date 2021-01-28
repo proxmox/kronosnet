@@ -1,3 +1,9 @@
+kronosnet (1.20-pve1) UNRELEASED; urgency=medium
+
+  * update to v1.20 upstream release
+
+ -- Proxmox Support Team <support@proxmox.com>  Thu, 28 Jan 2021 12:05:58 +0100
+
 kronosnet (1.16-pve1) pve; urgency=medium
 
   * update to v1.16 upstream release
