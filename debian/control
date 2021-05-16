@@ -2,9 +2,9 @@ Source: kronosnet
 Section: admin
 Priority: optional
 Maintainer: Proxmox Support Team <support@proxmox.com>
-Standards-Version: 4.3.0
+Standards-Version: 4.5.1
 Build-Depends:
- debhelper (>= 11~),
+ debhelper (>= 12~),
  libnl-3-dev,
  libnl-route-3-dev,
  libsctp-dev [linux-any],
