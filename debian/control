@@ -5,8 +5,11 @@ Maintainer: Proxmox Support Team <support@proxmox.com>
 Standards-Version: 4.5.1
 Build-Depends:
  debhelper (>= 12~),
+# some tests use the ip utility from:
+ iproute2,
  libnl-3-dev,
  libnl-route-3-dev,
+ libqb-dev,
  libsctp-dev [linux-any],
  pkg-config,
 # Compress plugins:
@@ -22,7 +25,6 @@ Build-Depends:
  libssl-dev,
 Build-Depends-Indep:
  doxygen,
- libqb-dev,
  libxml2-dev,
 Homepage: https://kronosnet.org/
 Vcs-Git: git://git.proxmox.com/git/kronosnet
