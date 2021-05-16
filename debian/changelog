@@ -1,4 +1,12 @@
-kronosnet (1.20-pve1) UNRELEASED; urgency=medium
+kronosnet (1.21-pve1) bullseye; urgency=medium
+
+  * update to v1.21 upstream release
+
+  * build for Debian Bullseye / Proxmox VE 7
+
+ -- Proxmox Support Team <support@proxmox.com>  Sun, 16 May 2021 16:27:13 +0200
+
+kronosnet (1.20-pve1) buster; urgency=medium
 
   * update to v1.20 upstream release
 
