@@ -1,0 +1,3 @@
+# False positives.  Let's reduce the noise until #909267 is fixed:
+libknet1: library-not-linked-against-libc usr/lib/x86_64-linux-gnu/kronosnet/compress_lz4.so
+libknet1: library-not-linked-against-libc usr/lib/x86_64-linux-gnu/kronosnet/compress_lz4hc.so
