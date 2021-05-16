@@ -1,0 +1,16 @@
+#!/bin/sh -ex
+
+DEB_HOST_GNU_TYPE=$(dpkg-architecture -q DEB_HOST_GNU_TYPE)
+PKG_CONFIG=$DEB_HOST_GNU_TYPE-pkg-config
+
+mkdir -p /dev/net
+[ -c /dev/net/tun ] || mknod -m666 /dev/net/tun c 10 200
+
+# api-test-coverage would need a build, so call check-TESTS, not check:
+make LIBS="$(${PKG_CONFIG} --libs libnozzle) \$(PTHREAD_LIBS) \$(libnl_LIBS)" \
+  VERBOSE=1 -C libnozzle/tests all check-TESTS
+
+if [ "$AUTOPKGTEST_ARTIFACTS" ]; then
+    mkdir "$AUTOPKGTEST_ARTIFACTS/libnozzle"
+    mv libnozzle/tests/*.log libnozzle/tests/*.trs "$AUTOPKGTEST_ARTIFACTS/libnozzle"
+fi

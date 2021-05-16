@@ -1,7 +1,7 @@
 Depends: libknet-dev, libnozzle-dev,
- gcc, libc6-dev, make, pkg-config,
- libnl-3-dev, libnl-route-3-dev, libsctp-dev,
- libbz2-dev, liblz4-dev, liblzma-dev, liblzo2-dev, zlib1g-dev,
+ build-essential, iproute2, pkg-config,
+ libnl-3-dev, libnl-route-3-dev, libqb-dev, libsctp-dev,
+ libbz2-dev, liblz4-dev, liblzma-dev, liblzo2-dev, libzstd-dev, zlib1g-dev,
  libnss3-dev, libssl-dev
 Restrictions: allow-stderr, isolation-container, needs-root
-Tests: unit
+Tests: configure libknet libnozzle
