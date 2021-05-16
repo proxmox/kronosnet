@@ -1,0 +1,13 @@
+#!/bin/sh -ex
+
+DEB_HOST_GNU_TYPE=$(dpkg-architecture -q DEB_HOST_GNU_TYPE)
+PKG_CONFIG=$DEB_HOST_GNU_TYPE-pkg-config
+
+# api-test-coverage would need a build, so call check-TESTS, not check:
+make LIBS="$(${PKG_CONFIG} --libs libknet) \$(PTHREAD_LIBS) \$(dl_LIBS)" \
+  VERBOSE=1 -C libknet/tests all check-TESTS || ret=$?
+
+if [ "$AUTOPKGTEST_ARTIFACTS" ]; then
+    mkdir "$AUTOPKGTEST_ARTIFACTS/libknet"
+    mv libknet/tests/*.log libknet/tests/*.trs "$AUTOPKGTEST_ARTIFACTS/libknet"
+fi

@@ -1,0 +1,6 @@
+#!/bin/sh -ex
+
+DEB_HOST_GNU_TYPE=$(dpkg-architecture -q DEB_HOST_GNU_TYPE)
+
+# We aren't cross building, not even when cross testing:
+./configure --disable-man --build=$DEB_HOST_GNU_TYPE --host=$DEB_HOST_GNU_TYPE
