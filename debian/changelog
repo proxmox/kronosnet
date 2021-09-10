@@ -1,3 +1,9 @@
+kronosnet (1.22-pve1) bullseye; urgency=medium
+
+  * update to v1.22 upstream release
+
+ -- Proxmox Support Team <support@proxmox.com>  Fri, 10 Sep 2021 13:09:11 +0200
+
 kronosnet (1.21-pve1) bullseye; urgency=medium
 
   * update to v1.21 upstream release
