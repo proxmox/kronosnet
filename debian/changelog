@@ -1,3 +1,9 @@
+kronosnet (1.22-pve1~bpo10+1) buster-backports; urgency=medium
+
+  * Rebuild for Proxmox VE 6.x / buster-backports.
+
+ -- Proxmox Support Team <support@proxmox.com>  Fri, 08 Oct 2021 16:13:11 +0200
+
 kronosnet (1.22-pve1) bullseye; urgency=medium
 
   * update to v1.22 upstream release
