@@ -1,3 +1,15 @@
+kronosnet (1.22-pve2~bpo10+1) buster-backports; urgency=medium
+
+  * Rebuild for Proxmox VE 6.x / buster-backports.
+
+ -- Proxmox Support Team <support@proxmox.com>  Wed, 1 Dec 2021 10:04:37 +0100
+
+kronosnet (1.22-pve2) bullseye; urgency=medium
+
+  * cherry pick fixes for membership change under high network load
+
+ -- Proxmox Support Team <support@proxmox.com>  Tue, 9 Nov 2021 11:44:52 +0100
+
 kronosnet (1.22-pve1~bpo10+1) buster-backports; urgency=medium
 
   * Rebuild for Proxmox VE 6.x / buster-backports.
