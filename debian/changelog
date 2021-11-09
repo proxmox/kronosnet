@@ -1,3 +1,9 @@
+kronosnet (1.22-pve2) bullseye; urgency=medium
+
+  * cherry pick fixes for membership change under high network load
+
+ -- Proxmox Support Team <support@proxmox.com>  Tue, 9 Nov 2021 11:44:52 +0100
+
 kronosnet (1.22-pve1) bullseye; urgency=medium
 
   * update to v1.22 upstream release
