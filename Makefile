@@ -45,7 +45,7 @@ submodule:
 
 .PHONY: upload
 upload: ${DEBS}
-	tar cf - ${DEBS} | ssh repoman@repo.proxmox.com upload --product pve --dist bullseye
+	tar cf - ${DEBS} | ssh repoman@repo.proxmox.com upload --product pve --dist bookworm
 
 .PHONY: clean
 clean:
