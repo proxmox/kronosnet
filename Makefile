@@ -50,8 +50,9 @@ submodule:
 	test -f "$(SRC_SUBMODULE)/README" || git submodule update --init $(SRC_SUBMODULE)
 
 .PHONY: upload
+upload: UPLOAD_DIST ?= $(DEB_DISTRIBUTION)
 upload: $(DEBS)
-	tar cf - $(DEBS) | ssh repoman@repo.proxmox.com upload --product pve --dist bookworm
+	tar cf - $(DEBS) | ssh repoman@repo.proxmox.com upload --product pve --dist $(UPLOAD_DIST)
 
 .PHONY: clean
 clean:
