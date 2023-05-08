@@ -3,7 +3,9 @@ include /usr/share/dpkg/architecture.mk
 
 VERSION=$(DEB_VERSION_UPSTREAM)
 
-BUILDDIR=kronosnet-$(VERSION)
+PACKAGE=kronosnet
+BUILDDIR=$(PACKAGE)-$(VERSION)
+ORIG_SRC_TAR=$(PACKAGE)_$(DEB_VERSION_UPSTREAM).orig.tar.gz
 SRC_SUBMODULE=upstream
 
 ARCH=$(DEB_BUILD_ARCH)
@@ -26,6 +28,7 @@ all:
 $(BUILDDIR): $(SRC_SUBMODULE)/README
 	rm -rf $(BUILDDIR)
 	cp -a upstream $(BUILDDIR)
+	echo "$(DEB_VERSION_UPSTREAM)" >$(BUILDDIR)/.tarball-version
 	cp -a debian/ $(BUILDDIR)
 
 deb: $(DEBS)
@@ -34,8 +37,11 @@ $(MAIN_DEB): $(BUILDDIR)
 	cd $(BUILDDIR); dpkg-buildpackage -b -us -uc
 	lintian $(MAIN_DEB) $(OTHER_DEBS)
 
+$(ORIG_SRC_TAR): $(BUILDDIR)
+	tar czf $(ORIG_SRC_TAR) --exclude="$(BUILDDIR)/debian" $(BUILDDIR)
+
 dsc: $(DSC)
-$(DSC): $(BUILDDIR)
+$(DSC): $(BUILDDIR) $(ORIG_SRC_TAR)
 	cd $(BUILDDIR); dpkg-buildpackage -S -us -uc -d -nc
 
 # make sure submodules were initialized
