@@ -22,7 +22,7 @@ OTHER_DEBS=								\
 DEBS=$(MAIN_DEB) $(OTHER_DEBS)
 DSC=kronosnet-$(DEB_VERSION).dsc
 
-all:
+all: $(DEBS)
 	ls -1 $(DEBS)
 
 $(BUILDDIR): $(SRC_SUBMODULE)/README
@@ -43,6 +43,9 @@ $(ORIG_SRC_TAR): $(BUILDDIR)
 dsc: $(DSC)
 $(DSC): $(BUILDDIR) $(ORIG_SRC_TAR)
 	cd $(BUILDDIR); dpkg-buildpackage -S -us -uc -d -nc
+
+sbuild: $(DSC)
+	sbuild $(DSC)
 
 # make sure submodules were initialized
 .PHONY: submodule
