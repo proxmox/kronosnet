@@ -18,7 +18,7 @@ OTHER_DEBS=								\
 	libnozzle1_$(DEB_VERSION)_$(ARCH).deb
 
 DEBS=$(MAIN_DEB) $(OTHER_DEBS)
-DSC=kronosnet-$(DEB_VERSION).dsc
+DSC=kronosnet_$(DEB_VERSION).dsc
 
 all: $(DEBS)
 	ls -1 $(DEBS)
