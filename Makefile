@@ -1,14 +1,12 @@
 include /usr/share/dpkg/pkg-info.mk
 include /usr/share/dpkg/architecture.mk
 
-VERSION=$(DEB_VERSION_UPSTREAM)
-
 PACKAGE=kronosnet
-BUILDDIR=$(PACKAGE)-$(VERSION)
+BUILDDIR=$(PACKAGE)-$(DEB_VERSION_UPSTREAM)
 ORIG_SRC_TAR=$(PACKAGE)_$(DEB_VERSION_UPSTREAM).orig.tar.gz
 SRC_SUBMODULE=upstream
 
-ARCH=$(DEB_BUILD_ARCH)
+ARCH=$(DEB_HOST_ARCH)
 
 MAIN_DEB=libknet1_$(DEB_VERSION)_$(ARCH).deb
 OTHER_DEBS=								\
