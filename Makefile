@@ -59,7 +59,7 @@ upload: $(DEBS)
 
 .PHONY: clean
 clean:
-	rm -rf *~ *.deb *.changes *.dsc $(BUILDDIR) *.orig.tar.xz *.debian.tar.xz *.buildinfo
+	rm -rf *~ *.deb *.changes *.dsc $(PACKAGE)-[0-9]* $(PACKAGE)*.tar* *.build *.buildinfo
 
 .PHONY: dinstall
 dinstall: $(DEBS)
