@@ -38,7 +38,10 @@ $(MAIN_DEB): $(BUILDDIR)
 $(ORIG_SRC_TAR): $(BUILDDIR)
 	tar czf $(ORIG_SRC_TAR) --exclude="$(BUILDDIR)/debian" $(BUILDDIR)
 
-dsc: $(DSC)
+dsc: clean
+	$(MAKE) $(DSC)
+	lintian $(DSC)
+
 $(DSC): $(BUILDDIR) $(ORIG_SRC_TAR)
 	cd $(BUILDDIR); dpkg-buildpackage -S -us -uc -d
 
