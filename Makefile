@@ -40,7 +40,7 @@ $(ORIG_SRC_TAR): $(BUILDDIR)
 
 dsc: $(DSC)
 $(DSC): $(BUILDDIR) $(ORIG_SRC_TAR)
-	cd $(BUILDDIR); dpkg-buildpackage -S -us -uc -d -nc
+	cd $(BUILDDIR); dpkg-buildpackage -S -us -uc -d
 
 sbuild: $(DSC)
 	sbuild $(DSC)
