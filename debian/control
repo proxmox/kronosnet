@@ -2,9 +2,9 @@ Source: kronosnet
 Section: admin
 Priority: optional
 Maintainer: Proxmox Support Team <support@proxmox.com>
-Standards-Version: 4.5.1
+Standards-Version: 4.6.2
 Build-Depends:
- debhelper (>= 12~),
+ debhelper-compat (= 13),
 # some tests use the ip utility from:
  iproute2,
  libnl-3-dev,
