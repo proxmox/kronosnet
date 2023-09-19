@@ -1,6 +1,7 @@
 #!/usr/bin/make -f
 
-export DEB_BUILD_MAINT_OPTIONS = hardening=+all
+# FORTIFY_SOURCE is handled by knet's configure
+export DEB_BUILD_MAINT_OPTIONS = hardening=+all,-fortify
 
 # Ensure that we link against all needed libraries (cf. Policy 10.2)
 export DEB_LDFLAGS_MAINT_APPEND=-Wl,-z,defs
