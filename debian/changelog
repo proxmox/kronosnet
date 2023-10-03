@@ -1,3 +1,9 @@
+kronosnet (1.28-pve1) bookworm; urgency=medium
+
+  * update to new upstream v1.28 release
+
+ -- Proxmox Support Team <support@proxmox.com>  Tue, 03 Oct 2023 09:42:18 +0200
+
 kronosnet (1.26-pve1) bookworm; urgency=medium
 
   * update to new upstream v1.26 release
