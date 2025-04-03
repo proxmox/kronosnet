@@ -1,3 +1,10 @@
+kronosnet (1.30-pve1) bookworm; urgency=medium
+
+  * update to new upstream v1.30 release
+  * cherry-pick upstream hardening for LZO decompression
+
+ -- Proxmox Support Team <support@proxmox.com>  Thu, 03 Apr 2025 15:23:45 +0200
+
 kronosnet (1.28-pve1) bookworm; urgency=medium
 
   * update to new upstream v1.28 release
