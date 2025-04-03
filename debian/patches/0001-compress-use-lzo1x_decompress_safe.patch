@@ -1,0 +1,38 @@
+From 3126d924b48db93501b7eafb2cc1bf0a60363af9 Mon Sep 17 00:00:00 2001
+From: Christine Caulfield <ccaulfie@redhat.com>
+Date: Thu, 20 Mar 2025 10:41:43 +0000
+Subject: [PATCH] compress: use lzo1x_decompress_safe
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+lzo1x_decompress() can SEGV if bad data is passed to it.
+lzo1x_decompress_safe() is slower but ... safer.
+
+Issue #435
+
+Signed-off-by: Christine Caulfield<ccaulfie@redhat.com>
+Signed-off-by: Fabian Grünbichler <f.gruenbichler@proxmox.com>
+---
+ libknet/compress_lzo2.c | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/libknet/compress_lzo2.c b/libknet/compress_lzo2.c
+index b69d4649..2094bde2 100644
+--- a/libknet/compress_lzo2.c
++++ b/libknet/compress_lzo2.c
+@@ -145,9 +145,9 @@ static int lzo2_decompress(
+ {
+ 	int lzerr = 0, err = 0;
+ 	int savederrno = 0;
+-	lzo_uint decmp_len;
++	lzo_uint decmp_len = *buf_out_len;
+ 
+-	lzerr = lzo1x_decompress(buf_in, buf_in_len, buf_out, &decmp_len, NULL);
++	lzerr = lzo1x_decompress_safe(buf_in, buf_in_len, buf_out, &decmp_len, NULL);
+ 
+ 	if (lzerr != LZO_E_OK) {
+ 		log_err(knet_h, KNET_SUB_LZO2COMP, "lzo2 internal decompression error");
+-- 
+2.39.5
+
