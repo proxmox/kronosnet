@@ -1,3 +1,9 @@
+kronosnet (1.30-pve2) bookworm; urgency=medium
+
+  * (temporarily) revert routing checks
+
+ -- Proxmox Support Team <support@proxmox.com>  Mon, 07 Apr 2025 14:42:21 +0200
+
 kronosnet (1.30-pve1) bookworm; urgency=medium
 
   * update to new upstream v1.30 release
