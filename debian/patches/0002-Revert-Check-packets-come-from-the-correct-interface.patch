@@ -1,0 +1,381 @@
+From 19b86b7764eff9e57225cc5680bb38e498d7913f Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Fabian=20Gr=C3=BCnbichler?= <f.gruenbichler@proxmox.com>
+Date: Mon, 7 Apr 2025 14:37:27 +0200
+Subject: [PATCH] Revert "Check packets come from the correct interface"
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+This reverts commit c7610532347b53c0774dbca0bc98440fe599637c.
+
+Signed-off-by: Fabian Grünbichler <f.gruenbichler@proxmox.com>
+---
+ libknet/internals.h        |   1 -
+ libknet/links.c            |  20 -------
+ libknet/threads_rx.c       |   7 ---
+ libknet/transport_common.c |   3 +-
+ libknet/transport_common.h |   2 +-
+ libknet/transport_sctp.c   |  16 +++---
+ libknet/transport_udp.c    | 105 +++----------------------------------
+ 7 files changed, 18 insertions(+), 136 deletions(-)
+
+diff --git a/libknet/internals.h b/libknet/internals.h
+index 7eddb71a..f120a3d3 100644
+--- a/libknet/internals.h
++++ b/libknet/internals.h
+@@ -151,7 +151,6 @@ struct knet_fd_trackers {
+ 					     * with this fd */
+ 	socklen_t sockaddr_len;             /* Size of sockaddr_in[6] structure for this socket */
+ 	void *data;			    /* pointer to the data */
+-	int ifindex;                        /* interface index for this bound address */
+ };
+ 
+ #define KNET_MAX_FDS KNET_MAX_HOST * KNET_MAX_LINK * 4
+diff --git a/libknet/links.c b/libknet/links.c
+index c695c6c0..d355a53a 100644
+--- a/libknet/links.c
++++ b/libknet/links.c
+@@ -22,25 +22,6 @@
+ #include "host.h"
+ #include "threads_common.h"
+ #include "links_acl.h"
+-#include <ifaddrs.h>
+-#include <net/if.h>
+-
+-static int find_ifindex(struct sockaddr_storage *addr)
+-{
+-	struct ifaddrs *ifrs, *ifa;
+-
+-	if (getifaddrs(&ifrs) == 0) {
+-		for (ifa = ifrs; ifa != NULL; ifa = ifa->ifa_next) {
+-			if (ifa->ifa_addr && cmpaddr(addr, (struct sockaddr_storage *)ifa->ifa_addr) == 0) {
+-				int ifindex = if_nametoindex(ifa->ifa_name);
+-				freeifaddrs(ifrs);
+-				return ifindex;
+-			}
+-		}
+-		freeifaddrs(ifrs);
+-	}
+-	return -1;
+-}
+ 
+ int _link_updown(knet_handle_t knet_h, knet_node_id_t host_id, uint8_t link_id,
+ 		 unsigned int enabled, unsigned int connected, unsigned int lock_stats)
+@@ -87,7 +68,6 @@ int _link_updown(knet_handle_t knet_h, knet_node_id_t host_id, uint8_t link_id,
+ 		if (++link->status.stats.last_up_time_index >= MAX_LINK_EVENTS) {
+ 			link->status.stats.last_up_time_index = 0;
+ 		}
+-		knet_h->knet_transport_fd_tracker[link->outsock].ifindex = find_ifindex(&link->src_addr);
+ 	} else {
+ 		time(&link->status.stats.last_down_times[link->status.stats.last_down_time_index]);
+ 		link->status.stats.down_count++;
+diff --git a/libknet/threads_rx.c b/libknet/threads_rx.c
+index 64af4509..6aab1cfa 100644
+--- a/libknet/threads_rx.c
++++ b/libknet/threads_rx.c
+@@ -973,9 +973,6 @@ void *_handle_recv_from_links_thread(void *data)
+ 	struct sockaddr_storage address[PCKT_RX_BUFS];
+ 	struct knet_mmsghdr msg[PCKT_RX_BUFS];
+ 	struct iovec iov_in[PCKT_RX_BUFS];
+-#if defined(IP_PKTINFO) || defined(IPV6_PKTINFO)
+-	unsigned char control_in[CMSG_SPACE(sizeof(struct in6_pktinfo))][PCKT_RX_BUFS];
+-#endif
+ 
+ 	set_thread_status(knet_h, KNET_THREAD_RX, KNET_THREAD_STARTED);
+ 
+@@ -992,10 +989,6 @@ void *_handle_recv_from_links_thread(void *data)
+ 		msg[i].msg_hdr.msg_namelen = sizeof(struct sockaddr_storage); /* Real value filled in before actual use */
+ 		msg[i].msg_hdr.msg_iov = &iov_in[i];
+ 		msg[i].msg_hdr.msg_iovlen = 1;
+-#if defined(IP_PKTINFO) || defined(IPV6_PKTINFO)
+-		msg[i].msg_hdr.msg_control = &control_in[0][i];
+-		msg[i].msg_hdr.msg_controllen = CMSG_SPACE(sizeof(struct in6_pktinfo)); /* Largest of the two pktinfo structs */
+-#endif
+ 	}
+ 
+ 	while (!shutdown_in_progress(knet_h)) {
+diff --git a/libknet/transport_common.c b/libknet/transport_common.c
+index d850cba9..fba01a36 100644
+--- a/libknet/transport_common.c
++++ b/libknet/transport_common.c
+@@ -426,7 +426,7 @@ int _is_valid_fd(knet_handle_t knet_h, int sockfd)
+  * must be called with global write lock
+  */
+ 
+-int _set_fd_tracker(knet_handle_t knet_h, int sockfd, uint8_t transport, uint8_t data_type, socklen_t socklen, void *data, int ifindex)
++int _set_fd_tracker(knet_handle_t knet_h, int sockfd, uint8_t transport, uint8_t data_type, socklen_t socklen, void *data)
+ {
+ 	if (sockfd < 0) {
+ 		errno = EINVAL;
+@@ -442,7 +442,6 @@ int _set_fd_tracker(knet_handle_t knet_h, int sockfd, uint8_t transport, uint8_t
+ 	knet_h->knet_transport_fd_tracker[sockfd].data_type = data_type;
+ 	knet_h->knet_transport_fd_tracker[sockfd].sockaddr_len = socklen;
+ 	knet_h->knet_transport_fd_tracker[sockfd].data = data;
+-	knet_h->knet_transport_fd_tracker[sockfd].ifindex = ifindex;
+ 
+ 	return 0;
+ }
+diff --git a/libknet/transport_common.h b/libknet/transport_common.h
+index b454cffd..8783457c 100644
+--- a/libknet/transport_common.h
++++ b/libknet/transport_common.h
+@@ -15,7 +15,7 @@ int _configure_transport_socket(knet_handle_t knet_h, int sock, struct sockaddr_
+ int _init_socketpair(knet_handle_t knet_h, int *sock);
+ void _close_socketpair(knet_handle_t knet_h, int *sock);
+ 
+-int _set_fd_tracker(knet_handle_t knet_h, int sockfd, uint8_t transport, uint8_t data_type, socklen_t socklen, void *data, int ifindex);
++int _set_fd_tracker(knet_handle_t knet_h, int sockfd, uint8_t transport, uint8_t data_type, socklen_t socklen, void *data);
+ int _is_valid_fd(knet_handle_t knet_h, int sockfd);
+ 
+ int _sendmmsg(int sockfd, int connection_oriented, struct knet_mmsghdr *msgvec, unsigned int vlen, unsigned int flags);
+diff --git a/libknet/transport_sctp.c b/libknet/transport_sctp.c
+index 9b4d85db..2eb5e106 100644
+--- a/libknet/transport_sctp.c
++++ b/libknet/transport_sctp.c
+@@ -118,7 +118,7 @@ static int _close_connect_socket(knet_handle_t knet_h, struct knet_link *kn_link
+ 			info->on_rx_epoll = 0;
+ 		}
+ 
+-		if (_set_fd_tracker(knet_h, info->connect_sock, KNET_MAX_TRANSPORTS, SCTP_NO_LINK_INFO, 0, NULL, -1) < 0) {
++		if (_set_fd_tracker(knet_h, info->connect_sock, KNET_MAX_TRANSPORTS, SCTP_NO_LINK_INFO, 0, NULL) < 0) {
+ 			savederrno = errno;
+ 			err = -1;
+ 			log_err(knet_h, KNET_SUB_TRANSP_SCTP, "Unable to set fd tracker: %s",
+@@ -258,7 +258,7 @@ static int _create_connect_socket(knet_handle_t knet_h, struct knet_link *kn_lin
+ 		goto exit_error;
+ 	}
+ 
+-	if (_set_fd_tracker(knet_h, connect_sock, KNET_TRANSPORT_SCTP, SCTP_CONNECT_LINK_INFO, sockaddr_len(&kn_link->src_addr), info, -1) < 0) {
++	if (_set_fd_tracker(knet_h, connect_sock, KNET_TRANSPORT_SCTP, SCTP_CONNECT_LINK_INFO, sockaddr_len(&kn_link->src_addr), info) < 0) {
+ 		savederrno = errno;
+ 		err = -1;
+ 		log_err(knet_h, KNET_SUB_TRANSP_SCTP, "Unable to set fd tracker: %s",
+@@ -870,7 +870,7 @@ static void _handle_incoming_sctp(knet_handle_t knet_h, int listen_sock)
+ 
+ 	if (_set_fd_tracker(knet_h, new_fd, KNET_TRANSPORT_SCTP, SCTP_ACCEPTED_LINK_INFO,
+ 			    knet_h->knet_transport_fd_tracker[listen_sock].sockaddr_len,
+-			    accept_info, -1) < 0) {
++			    accept_info) < 0) {
+ 		savederrno = errno;
+ 		err = -1;
+ 		log_err(knet_h, KNET_SUB_TRANSP_SCTP, "Unable to set fd tracker: %s",
+@@ -902,7 +902,7 @@ exit_error:
+ 		 * check the error to make coverity scan happy.
+ 		 * _set_fd_tracker cannot fail at this stage
+ 		 */
+-		if (_set_fd_tracker(knet_h, new_fd, KNET_MAX_TRANSPORTS, SCTP_NO_LINK_INFO, 0, NULL, -1) < 0){
++		if (_set_fd_tracker(knet_h, new_fd, KNET_MAX_TRANSPORTS, SCTP_NO_LINK_INFO, 0, NULL) < 0){
+ 			log_debug(knet_h, KNET_SUB_TRANSP_SCTP, "Unable to update fdtracker for socket %d", new_fd);
+ 		}
+ 		free(accept_info);
+@@ -976,7 +976,7 @@ static void _handle_listen_sctp_errors(knet_handle_t knet_h)
+ 			 * check the error to make coverity scan happy.
+ 			 * _set_fd_tracker cannot fail at this stage
+ 			 */
+-			if (_set_fd_tracker(knet_h, sockfd, KNET_MAX_TRANSPORTS, SCTP_NO_LINK_INFO, 0, NULL, -1) < 0) {
++			if (_set_fd_tracker(knet_h, sockfd, KNET_MAX_TRANSPORTS, SCTP_NO_LINK_INFO, 0, NULL) < 0) {
+ 				log_debug(knet_h, KNET_SUB_TRANSP_SCTP, "Unable to update fdtracker for socket %d", sockfd);
+ 			}
+ 			info->accepted_socks[i] = -1;
+@@ -1112,7 +1112,7 @@ static sctp_listen_link_info_t *sctp_link_listener_start(knet_handle_t knet_h, s
+ 		goto exit_error;
+ 	}
+ 
+-	if (_set_fd_tracker(knet_h, listen_sock, KNET_TRANSPORT_SCTP, SCTP_LISTENER_LINK_INFO, sockaddr_len(&kn_link->src_addr), info, -1) < 0) {
++	if (_set_fd_tracker(knet_h, listen_sock, KNET_TRANSPORT_SCTP, SCTP_LISTENER_LINK_INFO, sockaddr_len(&kn_link->src_addr), info) < 0) {
+ 		savederrno = errno;
+ 		err = -1;
+ 		log_err(knet_h, KNET_SUB_TRANSP_SCTP, "Unable to set fd tracker: %s",
+@@ -1217,7 +1217,7 @@ static int sctp_link_listener_stop(knet_handle_t knet_h, struct knet_link *kn_li
+ 		info->on_listener_epoll = 0;
+ 	}
+ 
+-	if (_set_fd_tracker(knet_h, info->listen_sock, KNET_MAX_TRANSPORTS, SCTP_NO_LINK_INFO, 0, NULL, -1) < 0) {
++	if (_set_fd_tracker(knet_h, info->listen_sock, KNET_MAX_TRANSPORTS, SCTP_NO_LINK_INFO, 0, NULL) < 0) {
+ 		savederrno = errno;
+ 		err = -1;
+ 		log_err(knet_h, KNET_SUB_TRANSP_SCTP, "Unable to set fd tracker: %s",
+@@ -1240,7 +1240,7 @@ static int sctp_link_listener_stop(knet_handle_t knet_h, struct knet_link *kn_li
+ 			info->on_rx_epoll = 0;
+ 			free(knet_h->knet_transport_fd_tracker[info->accepted_socks[i]].data);
+ 			close(info->accepted_socks[i]);
+-			if (_set_fd_tracker(knet_h, info->accepted_socks[i], KNET_MAX_TRANSPORTS, SCTP_NO_LINK_INFO, 0, NULL, -1) < 0) {
++			if (_set_fd_tracker(knet_h, info->accepted_socks[i], KNET_MAX_TRANSPORTS, SCTP_NO_LINK_INFO, 0, NULL) < 0) {
+ 				savederrno = errno;
+ 				err = -1;
+ 				log_err(knet_h, KNET_SUB_TRANSP_SCTP, "Unable to set fd tracker: %s",
+diff --git a/libknet/transport_udp.c b/libknet/transport_udp.c
+index 25b400e6..2e6ae255 100644
+--- a/libknet/transport_udp.c
++++ b/libknet/transport_udp.c
+@@ -17,7 +17,6 @@
+ #include <netinet/in.h>
+ #include <netinet/ip.h>
+ #include <netinet/ip_icmp.h>
+-#include <net/if.h>
+ #if defined (IP_RECVERR) || defined (IPV6_RECVERR)
+ #include <linux/errqueue.h>
+ #endif
+@@ -52,6 +51,9 @@ int udp_transport_link_set_config(knet_handle_t knet_h, struct knet_link *kn_lin
+ 	struct epoll_event ev;
+ 	udp_link_info_t *info;
+ 	udp_handle_info_t *handle_info = knet_h->transports[KNET_TRANSPORT_UDP];
++#if defined (IP_RECVERR) || defined (IPV6_RECVERR)
++	int value;
++#endif
+ 
+ 	/*
+ 	 * Only allocate a new link if the local address is different
+@@ -90,7 +92,7 @@ int udp_transport_link_set_config(knet_handle_t knet_h, struct knet_link *kn_lin
+ 
+ #ifdef IP_RECVERR
+ 	if (kn_link->src_addr.ss_family == AF_INET) {
+-		int value = 1;
++		value = 1;
+ 		if (setsockopt(sock, SOL_IP, IP_RECVERR, &value, sizeof(value)) <0) {
+ 			savederrno = errno;
+ 			err = -1;
+@@ -103,35 +105,9 @@ int udp_transport_link_set_config(knet_handle_t knet_h, struct knet_link *kn_lin
+ #else
+ 	log_debug(knet_h, KNET_SUB_TRANSP_UDP, "IP_RECVERR not available in this build/platform");
+ #endif
+-#ifdef IP_PKTINFO
+-	if (kn_link->src_addr.ss_family == AF_INET) {
+-		int value = 1;
+-		if (setsockopt(sock, SOL_IP, IP_PKTINFO, &value, sizeof(value)) <0) {
+-			savederrno = errno;
+-			err = -1;
+-			log_err(knet_h, KNET_SUB_TRANSP_UDP, "Unable to set PKTINFO on socket: %s",
+-				strerror(savederrno));
+-			goto exit_error;
+-		}
+-		log_debug(knet_h, KNET_SUB_TRANSP_UDP, "IP_PKTINFO enabled on socket: %i", sock);
+-	}
+-#endif
+-#ifdef IPV6_RECVPKTINFO
+-	if (kn_link->src_addr.ss_family == AF_INET6) {
+-		int value = 1;
+-		if (setsockopt(sock, IPPROTO_IPV6, IPV6_RECVPKTINFO, &value, sizeof(value)) <0) {
+-			savederrno = errno;
+-			err = -1;
+-			log_err(knet_h, KNET_SUB_TRANSP_UDP, "Unable to set RECVPKTINFO on socket: %s",
+-				strerror(savederrno));
+-			goto exit_error;
+-		}
+-		log_debug(knet_h, KNET_SUB_TRANSP_UDP, "IPV6_RECVPKTINFO enabled on socket: %i", sock);
+-	}
+-#endif
+ #ifdef IPV6_RECVERR
+ 	if (kn_link->src_addr.ss_family == AF_INET6) {
+-		int value = 1;
++		value = 1;
+ 		if (setsockopt(sock, SOL_IPV6, IPV6_RECVERR, &value, sizeof(value)) <0) {
+ 			savederrno = errno;
+ 			err = -1;
+@@ -152,6 +128,7 @@ int udp_transport_link_set_config(knet_handle_t knet_h, struct knet_link *kn_lin
+ 			strerror(savederrno));
+ 		goto exit_error;
+ 	}
++
+ 	memset(&ev, 0, sizeof(struct epoll_event));
+ 	ev.events = EPOLLIN;
+ 	ev.data.fd = sock;
+@@ -166,7 +143,7 @@ int udp_transport_link_set_config(knet_handle_t knet_h, struct knet_link *kn_lin
+ 
+ 	info->on_epoll = 1;
+ 
+-	if (_set_fd_tracker(knet_h, sock, KNET_TRANSPORT_UDP, 0, sockaddr_len(&kn_link->src_addr), info, -1) < 0) {
++	if (_set_fd_tracker(knet_h, sock, KNET_TRANSPORT_UDP, 0, sockaddr_len(&kn_link->src_addr), info) < 0) {
+ 		savederrno = errno;
+ 		err = -1;
+ 		log_err(knet_h, KNET_SUB_TRANSP_UDP, "Unable to set fd tracker: %s",
+@@ -241,7 +218,7 @@ int udp_transport_link_clear_config(knet_handle_t knet_h, struct knet_link *kn_l
+ 		info->on_epoll = 0;
+ 	}
+ 
+-	if (_set_fd_tracker(knet_h, info->socket_fd, KNET_MAX_TRANSPORTS, 0, sockaddr_len(&kn_link->src_addr), NULL, -1) < 0) {
++	if (_set_fd_tracker(knet_h, info->socket_fd, KNET_MAX_TRANSPORTS, 0, sockaddr_len(&kn_link->src_addr), NULL) < 0) {
+ 		savederrno = errno;
+ 		err = -1;
+ 		log_err(knet_h, KNET_SUB_TRANSP_UDP, "Unable to set fd tracker: %s",
+@@ -481,77 +458,11 @@ int udp_transport_tx_sock_error(knet_handle_t knet_h, int sockfd, int subsys, in
+ 	return 0;
+ }
+ 
+-/*
+- * If the received IP addr doesn't match the destination IP
+- * then weird routing is going on.
+- */
+-static void check_dst_addr_is_valid(knet_handle_t knet_h, int sockfd, struct msghdr *msg)
+-{
+-#if defined(IP_PKTINFO) || defined(IPV6_PKTINFO)
+-        struct cmsghdr *cmsg;
+-
+-	for (cmsg = CMSG_FIRSTHDR(msg); cmsg != NULL; cmsg = CMSG_NXTHDR(msg, cmsg)) {
+-		int pkt_ifindex = -1;
+-		int ifindex = knet_h->knet_transport_fd_tracker[sockfd].ifindex;
+-		struct sockaddr_storage dstaddr;
+-#ifdef IP_PKTINFO
+-		if (cmsg->cmsg_level == SOL_IP && cmsg->cmsg_type == IP_PKTINFO) {
+-			struct in_pktinfo *pi = (void*)CMSG_DATA(cmsg);
+-			struct sockaddr_in *dstaddr4 = (struct sockaddr_in *)&dstaddr;
+-
+-			pkt_ifindex = pi->ipi_ifindex;
+-			dstaddr4->sin_family = AF_INET;
+-			dstaddr4->sin_port = 0; /* unknown to PKTINFO */
+-			dstaddr4->sin_addr.s_addr = pi->ipi_addr.s_addr;
+-		}
+-#endif
+-#ifdef IPV6_PKTINFO
+-		if (cmsg->cmsg_level == IPPROTO_IPV6 && cmsg->cmsg_type == IPV6_PKTINFO) {
+-			struct in6_pktinfo *pi = (void*)CMSG_DATA(cmsg);
+-			struct sockaddr_in6 *dstaddr6 = (struct sockaddr_in6 *)&dstaddr;
+-			memset(dstaddr6, 0, sizeof(struct sockaddr_in6));
+-
+-			pkt_ifindex = pi->ipi6_ifindex;
+-			dstaddr6->sin6_family = AF_INET6;
+-			dstaddr6->sin6_port = 0; /* unknown to PKTINFO */
+-			memcpy(&dstaddr6->sin6_addr, (char *)&pi->ipi6_addr, sizeof(pi->ipi6_addr));
+-		}
+-#endif
+-		if (ifindex != -1 && pkt_ifindex != -1 && ifindex != pkt_ifindex) {
+-				char srcaddr_s[KNET_MAX_HOST_LEN];
+-				char srcport_s[KNET_MAX_PORT_LEN];
+-				char dstaddr_s[KNET_MAX_HOST_LEN];
+-				char dstport_s[KNET_MAX_PORT_LEN];
+-				char expected_ifname[IF_NAMESIZE];
+-				char used_ifname[IF_NAMESIZE];
+-
+-				/* Make as detailed a message as we can */
+-				if ((if_indextoname(pkt_ifindex, used_ifname) == NULL) ||
+-				    (if_indextoname(ifindex, expected_ifname) == NULL)) {
+-					log_warn(knet_h, KNET_SUB_TRANSP_UDP, "Received packet on ifindex %d when expected ifindex %d", pkt_ifindex, ifindex);
+-				} else if (knet_addrtostr(msg->msg_name, msg->msg_namelen,
+-							  srcaddr_s, sizeof(srcaddr_s),
+-							  srcport_s, sizeof(srcport_s)) != 0) {
+-					log_warn(knet_h, KNET_SUB_TRANSP_UDP, "Received packet on i/f %s when expected i/f %s", used_ifname, expected_ifname);
+-				} else if (knet_addrtostr((struct sockaddr_storage *)&dstaddr, sizeof(dstaddr),
+-							  dstaddr_s, sizeof(dstaddr_s),
+-							  dstport_s, sizeof(dstport_s)) != 0) {
+-					log_warn(knet_h, KNET_SUB_TRANSP_UDP, "Received packet from %s on i/f %s when expected %s", srcaddr_s, used_ifname, expected_ifname);
+-				} else {
+-					log_warn(knet_h, KNET_SUB_TRANSP_UDP, "Received packet from %s to %s on i/f %s when expected %s", srcaddr_s, dstaddr_s, used_ifname, expected_ifname);
+-				}
+-		}
+-	}
+-#endif
+-}
+-
+ int udp_transport_rx_is_data(knet_handle_t knet_h, int sockfd, struct knet_mmsghdr *msg)
+ {
+ 	if (msg->msg_len == 0)
+ 		return KNET_TRANSPORT_RX_NOT_DATA_CONTINUE;
+ 
+-	check_dst_addr_is_valid(knet_h, sockfd, &msg->msg_hdr);
+-
+ 	return KNET_TRANSPORT_RX_IS_DATA;
+ }
+ 
+-- 
+2.39.5
+
