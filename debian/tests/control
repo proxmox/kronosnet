@@ -1,5 +1,5 @@
 Depends: libknet-dev, libnozzle-dev,
- build-essential, iproute2, pkg-config,
+ build-essential, iproute2 [linux-any],  net-tools [kfreebsd-any], pkgconf,
  libnl-3-dev, libnl-route-3-dev, libqb-dev, libsctp-dev,
  libbz2-dev, liblz4-dev, liblzma-dev, liblzo2-dev, libzstd-dev, zlib1g-dev,
  libnss3-dev, libssl-dev

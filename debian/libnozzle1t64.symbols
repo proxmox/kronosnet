@@ -1,4 +1,4 @@
-libnozzle.so.1 libnozzle1 #MINVER#
+libnozzle.so.1 libnozzle1t64 #MINVER#
 * Build-Depends-Package: libnozzle-dev
  LIBNOZZLE@LIBNOZZLE 1.6
  nozzle_add_ip@LIBNOZZLE 1.6

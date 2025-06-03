@@ -3,16 +3,16 @@ Upstream-Name: kronosnet
 Source: https://kronosnet.org/releases
 
 Files: *
-Copyright: 2010-2019 Red Hat, Inc.
+Copyright: 2010-2025 Red Hat, Inc.
 License: GPL-2+
 
 Files: libknet/*
        libnozzle/*
-Copyright: 2010-2019 Red Hat, Inc.
+Copyright: 2010-2025 Red Hat, Inc.
 License: LGPL-2.1+
 
 Files: debian/*
-Copyright: 2017-2019 Ferenc Wágner <wferi@debian.org>
+Copyright: 2017-2025 Ferenc Wágner <wferi@debian.org>
 License: LGPL-2.1+
 
 Files: build-aux/git-version-gen

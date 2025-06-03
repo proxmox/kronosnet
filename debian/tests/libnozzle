@@ -3,14 +3,20 @@
 DEB_HOST_GNU_TYPE=$(dpkg-architecture -q DEB_HOST_GNU_TYPE)
 PKG_CONFIG=$DEB_HOST_GNU_TYPE-pkg-config
 
+# Work around us carrying upstream bf929fc3 as a Debian patch, which
+# touches configure.ac (otherwise make tries to remake the build system):
+touch aclocal.m4 configure config.status libnozzle/tests/Makefile.in libnozzle/tests/Makefile
+
 mkdir -p /dev/net
 [ -c /dev/net/tun ] || mknod -m666 /dev/net/tun c 10 200
 
 # api-test-coverage would need a build, so call check-TESTS, not check:
 make LIBS="$(${PKG_CONFIG} --libs libnozzle) \$(PTHREAD_LIBS) \$(libnl_LIBS)" \
-  VERBOSE=1 -C libnozzle/tests all check-TESTS
+  VERBOSE=1 -C libnozzle/tests all check-TESTS || ret=$?
 
 if [ "$AUTOPKGTEST_ARTIFACTS" ]; then
     mkdir "$AUTOPKGTEST_ARTIFACTS/libnozzle"
     mv libnozzle/tests/*.log libnozzle/tests/*.trs "$AUTOPKGTEST_ARTIFACTS/libnozzle"
 fi
+
+exit $ret

@@ -1,0 +1,8 @@
+usr/lib/*/libknet.la
+usr/lib/*/libnozzle.la
+usr/lib/*/kronosnet/*.la
+usr/share/doc/libknet1/README
+usr/share/doc/libknet1/README.licence
+usr/share/doc/libknet1/COPYRIGHT
+usr/share/doc/libknet1/COPYING.applications
+usr/share/doc/libknet1/COPYING.libraries

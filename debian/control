@@ -2,16 +2,22 @@ Source: kronosnet
 Section: admin
 Priority: optional
 Maintainer: Proxmox Support Team <support@proxmox.com>
-Standards-Version: 4.6.2
+Standards-Version: 4.7.2
+Rules-Requires-Root: no
 Build-Depends:
  debhelper-compat (= 13),
-# some tests use the ip utility from:
- iproute2,
+# ensure that the time64 feature is enabled:
+ dpkg-dev (>= 1.22.5),
+# nozzle tests on Linux use the ip utility from:
+ iproute2 [linux-any],
+# ... and on BSD the ifconfig utility from:
+ net-tools [kfreebsd-any],
+# (Neither of the above actually happens without root privileges, though.)
  libnl-3-dev,
  libnl-route-3-dev,
  libqb-dev,
  libsctp-dev [linux-any],
- pkg-config,
+ pkgconf,
 # Compress plugins:
  libbz2-dev,
  liblz4-dev,
@@ -25,7 +31,7 @@ Build-Depends:
  libssl-dev,
 Build-Depends-Indep:
  doxygen,
- libxml2-dev,
+ doxygen2man,
 Homepage: https://kronosnet.org/
 Vcs-Git: git://git.proxmox.com/git/kronosnet
 Vcs-Browser: https://git.proxmox.com/?p=kronosnet.git;a=summary
@@ -49,7 +55,7 @@ Section: libdevel
 Architecture: linux-any kfreebsd-any
 Multi-Arch: same
 Depends:
- libknet1 (= ${binary:Version}),
+ libknet1t64 (= ${binary:Version}),
  ${misc:Depends},
 Suggests:
  libknet-doc (= ${binary:Version}),
@@ -74,7 +80,10 @@ Description: kronosnet core API documentation
  .
  This package contains the man pages of the API functions.
 
-Package: libknet1
+Package: libknet1t64
+Provides: ${t64:Provides}
+Replaces: libknet1
+Breaks: libknet1 (<< ${source:Version})
 Section: libs
 # Hurd misses both epoll and kevent:
 Architecture: linux-any kfreebsd-any
@@ -93,7 +102,7 @@ Section: libdevel
 Architecture: linux-any kfreebsd-any
 Multi-Arch: same
 Depends:
- libnozzle1 (= ${binary:Version}),
+ libnozzle1t64 (= ${binary:Version}),
  ${misc:Depends},
 Suggests:
  libknet-doc (= ${binary:Version}),
@@ -102,7 +111,10 @@ Description: userland wrapper around kernel tap devices (developer files)
  .
  This package contains header files required to build libnozzle clients.
 
-Package: libnozzle1
+Package: libnozzle1t64
+Provides: ${t64:Provides}
+Replaces: libnozzle1
+Breaks: libnozzle1 (<< ${source:Version})
 Section: libs
 # Hurd misses both epoll and kevent:
 Architecture: linux-any kfreebsd-any
