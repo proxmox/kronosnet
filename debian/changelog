@@ -1,3 +1,10 @@
+kronosnet (1.31-pve1) trixie; urgency=medium
+
+  * update to kronosnet 1.31
+  * sync packaging with Debian Trixie
+
+ -- Proxmox Support Team <support@proxmox.com>  Tue, 03 Jun 2025 10:40:13 +0200
+
 kronosnet (1.30-pve2) bookworm; urgency=medium
 
   * (temporarily) revert routing checks
