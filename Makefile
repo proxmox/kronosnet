@@ -8,14 +8,14 @@ SRC_SUBMODULE=upstream
 
 ARCH=$(DEB_HOST_ARCH)
 
-MAIN_DEB=libknet1_$(DEB_VERSION)_$(ARCH).deb
+MAIN_DEB=libknet1t64_$(DEB_VERSION)_$(ARCH).deb
 OTHER_DEBS=								\
 	libknet-dev_$(DEB_VERSION)_$(ARCH).deb			\
 	libknet-doc_$(DEB_VERSION)_all.deb			\
-	libknet1-dbgsym_$(DEB_VERSION)_$(ARCH).deb		\
-	libnozzle1-dbgsym_$(DEB_VERSION)_$(ARCH).deb		\
+	libknet1t64-dbgsym_$(DEB_VERSION)_$(ARCH).deb		\
+	libnozzle1t64-dbgsym_$(DEB_VERSION)_$(ARCH).deb		\
 	libnozzle-dev_$(DEB_VERSION)_$(ARCH).deb		\
-	libnozzle1_$(DEB_VERSION)_$(ARCH).deb
+	libnozzle1t64_$(DEB_VERSION)_$(ARCH).deb
 
 DEBS=$(MAIN_DEB) $(OTHER_DEBS)
 DSC=kronosnet_$(DEB_VERSION).dsc
