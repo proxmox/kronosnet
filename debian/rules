@@ -14,7 +14,9 @@ override_dh_auto_configure:
 	dh_auto_configure -- \
 		--docdir=/usr/share/doc/libknet1 \
 		`dh_listpackages | grep -q '^libknet-doc$$' || printf %s --disable-man` \
-		--disable-static
+		--disable-static \
+		--disable-wireshark-dissector \
+		;
 
 override_dh_installdocs:
 	dh_installdocs -A COPYRIGHT README
