@@ -3,6 +3,8 @@ libknet.so.1 libknet1t64 #MINVER#
  LIBKNET@LIBKNET 0.9
  knet_addrtostr@LIBKNET 0.9
  knet_get_compress_list@LIBKNET 0.9
+ knet_get_crypto_cipher_list@LIBKNET 1.34
+ knet_get_crypto_hash_list@LIBKNET 1.34
  knet_get_crypto_list@LIBKNET 0.9
  knet_get_transport_id_by_name@LIBKNET 0.9
  knet_get_transport_list@LIBKNET 0.9
@@ -32,6 +34,7 @@ libknet.so.1 libknet1t64 #MINVER#
  knet_handle_remove_datafd@LIBKNET 0.9
  knet_handle_set_transport_reconnect_interval@LIBKNET 0.9
  knet_handle_setfwd@LIBKNET 0.9
+ knet_handle_setprio_dscp@LIBKNET 1.32
  knet_host_add@LIBKNET 0.9
  knet_host_enable_status_change_notify@LIBKNET 0.9
  knet_host_get_host_list@LIBKNET 0.9
