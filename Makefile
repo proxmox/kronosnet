@@ -23,7 +23,7 @@ DSC=kronosnet_$(DEB_VERSION).dsc
 all: $(DEBS)
 	ls -1 $(DEBS)
 
-$(BUILDDIR): $(SRC_SUBMODULE)/README
+$(BUILDDIR): $(SRC_SUBMODULE)/README.md
 	rm -rf $(BUILDDIR)
 	cp -a upstream $(BUILDDIR)
 	echo "$(DEB_VERSION_UPSTREAM)" >$(BUILDDIR)/.tarball-version

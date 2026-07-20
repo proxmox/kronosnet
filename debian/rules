@@ -19,7 +19,7 @@ override_dh_auto_configure:
 		;
 
 override_dh_installdocs:
-	dh_installdocs -A COPYRIGHT README
+	dh_installdocs -A COPYRIGHT README.md
 
 override_dh_makeshlibs:
 	dh_makeshlibs --exclude=/kronosnet/ # ignore the modules
