@@ -1,3 +1,10 @@
+kronosnet (1.35-pve2) trixie; urgency=medium
+
+  * build: re-enable sctp when building libknet, deprecated and disabled by
+    default since kronosnet 1.32
+
+ -- Proxmox Support Team <support@proxmox.com>  Mon, 14 Sep 2026 09:30:02 +0200
+
 kronosnet (1.35-pve1) trixie; urgency=medium
 
   * update to kronosnet 1.35
