@@ -1,3 +1,10 @@
+kronosnet (1.36-pve1) trixie; urgency=medium
+
+  * update to kronosnet 1.36
+    - minor build fixes, copyright updates
+
+ -- Proxmox Support Team <support@proxmox.com>  Mon, 02 Nov 2026 17:02:35 +0100
+
 kronosnet (1.35-pve2) trixie; urgency=medium
 
   * build: re-enable sctp when building libknet, deprecated and disabled by
